@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="title">Luxembourg Address Conflation Dashboard</h1>
+<table class="table is-striped is-hoverable">
+<thead>
+<tr><th>Metric</th><th>Value</th><th>Trend</th></tr>
+</thead>
+<tbody>
+{% for metric in metrics %}
+<tr class="toggle" data-target="d-{{ metric.slug }}">
+  <td><span class="icon">&#9654;</span> {{ metric.title }}</td>
+  <td>{{ metric.value }}</td>
+  <td>{% if metric.graph %}<img src="{{ metric.graph }}" alt="trend" style="height:40px">{% endif %}</td>
+</tr>
+<tr id="d-{{ metric.slug }}" class="is-hidden">
+  <td colspan="3">
+    <p>{{ metric.description }}</p>
+    {% if metric.details %}
+    {% if metric.details.josm %}<p><a href="{{ metric.details.josm }}">Load in JOSM</a></p>{% endif %}
+    <table class="table is-bordered is-narrow is-fullwidth">
+      <thead><tr>{% for h in metric.details.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for row in metric.details.rows %}
+      <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.toggle').forEach(tr => {
+  tr.addEventListener('click', () => {
+    const target = document.getElementById(tr.dataset.target);
+    if (target.classList.contains('is-hidden')) {
+      target.classList.remove('is-hidden');
+      tr.querySelector('.icon').textContent = '\u25BC';
+    } else {
+      target.classList.add('is-hidden');
+      tr.querySelector('.icon').textContent = '\u25B6';
+    }
+  });
+});
+</script>
+{% endblock %}
