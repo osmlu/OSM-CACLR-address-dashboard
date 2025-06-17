@@ -34,7 +34,7 @@ Queries run concurrently so the dashboard builds quickly.
 ### Running the tests
 
 ```
-pytest
+uv run pytest
 ```
 
 ### Code style
