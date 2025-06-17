@@ -31,16 +31,6 @@ in JOSM" link is offered. The script uses an
 [uv](https://github.com/astral-sh/uv) shebang to automatically install its Python dependencies.
 Queries run concurrently so the dashboard builds quickly.
 
-### Test setup
-
-Create a virtual environment and install the dependencies from
-`pyproject.toml`:
-
-```bash
-uv venv
-uv sync
-```
-
 ### Running the tests
 
 ```
