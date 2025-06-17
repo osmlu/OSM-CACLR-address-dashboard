@@ -87,7 +87,8 @@ class Dashboard:
         password = self.config.get("database", "password", fallback="")
         if password:
             self.conn_params["password"] = password
-        self.pool = ThreadedConnectionPool(1, 8, **self.conn_params)
+        max_conn = self.config.getint("database", "max_connections", fallback=32)
+        self.pool = ThreadedConnectionPool(1, max_conn, **self.conn_params)
 
     def run(self) -> None:
         metric_dir = self.config.get("paths", "metrics_dir", fallback="metrics")
