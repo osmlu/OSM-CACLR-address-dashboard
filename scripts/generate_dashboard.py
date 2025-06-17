@@ -41,6 +41,14 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
         header = True
         for line in lines:
             stripped = line.strip()
+            if stripped.lower().startswith("-- include"):
+                parts = stripped.split()
+                if len(parts) >= 3:
+                    inc_file = os.path.join(include_dir, parts[2])
+                    with open(inc_file) as inc:
+                        sql_lines.append(inc.read())
+                header = False
+                continue
             if header and stripped.startswith("--"):
                 comment = stripped[2:].strip()
                 lower = comment.lower()
@@ -51,16 +59,9 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
                 else:
                     # ignore other comment lines in header
                     pass
-            else:
-                header = False
-                if stripped.lower().startswith("-- include"):
-                    parts = stripped.split()
-                    if len(parts) >= 3:
-                        inc_file = os.path.join(include_dir, parts[2])
-                        with open(inc_file) as inc:
-                            sql_lines.append(inc.read())
-                    continue
-                sql_lines.append(line)
+                continue
+            header = False
+            sql_lines.append(line)
 
         sql = "".join(sql_lines).strip()
 
