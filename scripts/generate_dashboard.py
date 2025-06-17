@@ -63,6 +63,7 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
                 sql_lines.append(line)
 
         sql = "".join(sql_lines).strip()
+
         metrics.append((slug, title, description, sql))
     return metrics
 
@@ -105,7 +106,10 @@ class Dashboard:
             }
             for fut in as_completed(futs):
                 slug, title, desc = futs[fut]
-                rows, headers = fut.result()
+                try:
+                    rows, headers = fut.result()
+                except Exception as exc:  # pragma: no cover - passthrough
+                    raise RuntimeError(f"error in metric '{slug}': {exc}") from exc
                 results.append((slug, title, desc, rows, headers))
 
         for slug, title, desc, rows, headers in sorted(results):
