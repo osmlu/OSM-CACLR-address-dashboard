@@ -1,10 +1,4 @@
-#!/usr/bin/env -S uv run --script python3
-# [project]
-# dependencies = [
-#     "psycopg2-binary",
-#     "Jinja2",
-#     "matplotlib",
-# ]
+#!/usr/bin/env -S uv run
 """Generate the main dashboard as static HTML."""
 
 from __future__ import annotations
