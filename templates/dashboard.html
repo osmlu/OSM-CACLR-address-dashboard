@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 class="title">Luxembourg Address Conflation Dashboard</h1>
-<table class="table is-striped is-hoverable">
-<thead>
+<div class="mb-3">
+  <button id="toggle-zero" class="button is-small">Hide Zero Results</button>
+</div>
+<table class="table is-striped is-hoverable" id="metrics-table">
+<thead id="metrics-head">
 <tr><th>Metric</th><th>Value</th><th>Trend</th></tr>
 </thead>
 <tbody>
 {% for metric in metrics %}
-<tr class="toggle" data-target="d-{{ metric.slug }}">
+<tr class="toggle" data-target="d-{{ metric.slug }}" data-value="{{ metric.value }}">
   <td><span class="icon">&#9654;</span> {{ metric.title }}</td>
   <td>{{ metric.value }}</td>
   <td>{% if metric.graph %}<img src="{{ metric.graph }}" alt="trend" style="height:40px">{% endif %}</td>
@@ -17,6 +20,7 @@
     <p>{{ metric.description }}</p>
     {% if metric.details %}
     {% if metric.details.josm %}<p><a href="{{ metric.details.josm }}">Load in JOSM</a></p>{% endif %}
+    <div class="table-container">
     <table class="table is-bordered is-narrow is-fullwidth">
       <thead><tr>{% for h in metric.details.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
       <tbody>
@@ -25,6 +29,7 @@
       {% endfor %}
       </tbody>
     </table>
+    </div>
     {% endif %}
   </td>
 </tr>
@@ -34,16 +39,65 @@
 {% endblock %}
 {% block extra_scripts %}
 <script>
-document.querySelectorAll('.toggle').forEach(tr => {
-  tr.addEventListener('click', () => {
-    const target = document.getElementById(tr.dataset.target);
-    if (target.classList.contains('is-hidden')) {
-      target.classList.remove('is-hidden');
-      tr.querySelector('.icon').textContent = '\u25BC';
-    } else {
-      target.classList.add('is-hidden');
-      tr.querySelector('.icon').textContent = '\u25B6';
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleRows = document.querySelectorAll('#metrics-table tbody tr.toggle');
+  toggleRows.forEach(tr => {
+    tr.addEventListener('click', () => {
+      const target = document.getElementById(tr.dataset.target);
+      if (target.classList.contains('is-hidden')) {
+        target.classList.remove('is-hidden');
+        tr.querySelector('.icon').textContent = '\u25BC';
+      } else {
+        target.classList.add('is-hidden');
+        tr.querySelector('.icon').textContent = '\u25B6';
+      }
+    });
+  });
+
+  const table = document.getElementById('metrics-table');
+  const headers = table.tHead.querySelectorAll('th');
+  const sortState = Array.from(headers, () => false);
+  headers.forEach((th, idx) => {
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', e => {
+      e.preventDefault();
+      sortState[idx] = !sortState[idx];
+      const asc = sortState[idx];
+      const rows = Array.from(table.tBodies[0].querySelectorAll('tr.toggle'));
+      rows.sort((a, b) => {
+        let aText = a.children[idx].textContent.trim();
+        let bText = b.children[idx].textContent.trim();
+        if (idx === 1) {
+          aText = parseFloat(aText);
+          bText = parseFloat(bText);
+          return (aText - bText) * (asc ? 1 : -1);
+        }
+        return aText.localeCompare(bText) * (asc ? 1 : -1);
+      });
+      rows.forEach(r => {
+        const detail = document.getElementById(r.dataset.target);
+        table.tBodies[0].appendChild(r);
+        table.tBodies[0].appendChild(detail);
+      });
+    });
+  });
+
+  const btnZero = document.getElementById('toggle-zero');
+  let hideZero = false;
+  btnZero.addEventListener('click', () => {
+    hideZero = !hideZero;
+    btnZero.textContent = hideZero ? 'Show Zero Results' : 'Hide Zero Results';
+    document.querySelectorAll('#metrics-table tbody tr.toggle').forEach(row => {
+      const val = parseInt(row.dataset.value, 10) || 0;
+      const detail = document.getElementById(row.dataset.target);
+      if (hideZero && val === 0) {
+        row.style.display = 'none';
+        detail.style.display = 'none';
+      } else {
+        row.style.display = '';
+        detail.style.display = detail.classList.contains('is-hidden') ? 'none' : '';
+      }
+    });
   });
 });
 </script>
