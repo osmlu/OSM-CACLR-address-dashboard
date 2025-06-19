@@ -1,5 +1,5 @@
 -- Title: Duplicate CACLR IDs
--- Description: Addresses sharing the same id_caclr_bat value
+-- Description: Context: Addresses in CACLR sharing the same id_caclr_bat value
 SELECT count(*) FROM (
     SELECT id_caclr_bat
     FROM addresses

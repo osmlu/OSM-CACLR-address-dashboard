@@ -1,5 +1,5 @@
 -- Title: Mixed Maison localities
--- Description: Localities containing both 'Maison' and regular street addresses
+-- Description: Context: Localities in CACLR containing both 'Maison' and regular street addresses
 WITH maison AS (
     SELECT count(numero) AS numeromaison, localite
     FROM addresses

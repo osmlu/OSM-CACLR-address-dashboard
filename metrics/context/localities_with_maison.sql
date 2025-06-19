@@ -1,5 +1,5 @@
 -- Title: Maison localities
--- Description: Number of localities where street name is 'Maison'
+-- Description: Context: Number of localities in CACLR containing street name 'Maison'
 SELECT count(*) FROM (
     SELECT localite
     FROM addresses
