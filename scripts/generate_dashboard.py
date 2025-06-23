@@ -8,15 +8,15 @@ import datetime as dt
 import glob
 import os
 from configparser import ConfigParser
+import matplotlib.pyplot as plt
+import matplotlib
 
 from psycopg2.pool import ThreadedConnectionPool
 from jinja2 import Environment, FileSystemLoader
 
-import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 
-
+# Default configuration file path
 CONFIG_FILE = os.environ.get("DASHBOARD_CONFIG", "config.ini")
 
 
@@ -26,11 +26,9 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
     Returns list of (slug, title, description, sql) tuples.
     """
     metrics: list[tuple[str, str, str, str]] = []
-    for path in sorted(
-        glob.glob(os.path.join(metric_dir,  "*.sql"), recursive=True)
-    ):
+    for path in sorted(glob.glob(os.path.join(metric_dir, "*.sql"), recursive=True)):
         slug = os.path.splitext(os.path.basename(path))[0]
-        with open(path) as fh:
+        with open(path, encoding="utf-8") as fh:
             lines = fh.readlines()
 
         title = slug.replace("_", " ").title()
@@ -43,7 +41,7 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
                 parts = stripped.split()
                 if len(parts) >= 3:
                     inc_file = os.path.join(include_dir, parts[2])
-                    with open(inc_file) as inc:
+                    with open(inc_file, encoding="utf-8") as inc:
                         sql_lines.append(inc.read())
                 header = False
                 continue
@@ -68,6 +66,8 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
 
 
 class Dashboard:
+    """Generate the dashboard from metrics."""
+
     def __init__(self, config: ConfigParser) -> None:
         self.config = config
         self.output_dir = self.config.get("paths", "output_dir", fallback="output")
@@ -79,6 +79,8 @@ class Dashboard:
         self.conn_params = {
             "port": self.config.getint("database", "port", fallback=5432),
             "dbname": self.config.get("database", "dbname"),
+            "autoescape": True,
+            "application_name": "osm-caclr-dashboard",
             "user": self.config.get("database", "user"),
         }
         host = self.config.get("database", "host", fallback="")
@@ -136,7 +138,9 @@ class Dashboard:
             )
         template = self.env.get_template("dashboard.html")
         html = template.render(metrics=metrics)
-        with open(os.path.join(self.output_dir, "index.html"), "w") as fh:
+        with open(
+            os.path.join(self.output_dir, "index.html"), "w", encoding="utf-8"
+        ) as fh:
             fh.write(html)
         self.pool.closeall()
 
@@ -154,7 +158,7 @@ class Dashboard:
     def _update_history(self, slug: str, value: int) -> None:
         path = os.path.join(self.history_dir, f"{slug}.csv")
         is_new = not os.path.exists(path)
-        with open(path, "a", newline="") as fh:
+        with open(path, "a", newline="", encoding="utf-8") as fh:
             writer = csv.writer(fh)
             if is_new:
                 writer.writerow(["date", "value"])
@@ -166,13 +170,13 @@ class Dashboard:
             return None
         dates, values = [], []
         try:
-            with open(path) as fh:
+            with open(path, encoding="utf-8") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
                     dates.append(dt.datetime.fromisoformat(row["date"]))
                     values.append(int(row["value"]))
-        except Exception:
-            return None
+        except (csv.Error, ValueError) as exc:
+            raise RuntimeError(f"error reading history for '{slug}': {exc}") from exc
         if len(values) < 2:
             return None
         plt.figure(figsize=(2.5, 1))
@@ -199,6 +203,11 @@ class Dashboard:
 
 
 def main() -> None:
+    """Main entry point for the dashboard generation."""
+    if not os.path.exists(CONFIG_FILE):
+        raise FileNotFoundError(f"Configuration file '{CONFIG_FILE}' not found.")
+    if not os.path.isfile(CONFIG_FILE):
+        raise IsADirectoryError(f"Configuration file '{CONFIG_FILE}' is not a file.")
     config = ConfigParser()
     config.read(CONFIG_FILE)
     Dashboard(config).run()
