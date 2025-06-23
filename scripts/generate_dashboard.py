@@ -9,12 +9,10 @@ import glob
 import os
 from configparser import ConfigParser
 
-import psycopg2
 from psycopg2.pool import ThreadedConnectionPool
 from jinja2 import Environment, FileSystemLoader
 
 import matplotlib
-
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -29,7 +27,7 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
     """
     metrics: list[tuple[str, str, str, str]] = []
     for path in sorted(
-        glob.glob(os.path.join(metric_dir, "**", "*.sql"), recursive=True)
+        glob.glob(os.path.join(metric_dir,  "*.sql"), recursive=True)
     ):
         slug = os.path.splitext(os.path.basename(path))[0]
         with open(path) as fh:
