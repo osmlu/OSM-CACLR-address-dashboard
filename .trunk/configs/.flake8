@@ -1,0 +1,9 @@
+[flake8]
+; I100 - Ignore import order
+; I201 - Ignore multiple imports on one line
+; E1 - Ignore missing docstring in module
+; E2 - Ignore missing docstring in class
+; E3 - Ignore missing docstring in function
+; E501 - Ignore line too long
+
+extend-ignore = I100, E501, E1, E2, E3, Q000
