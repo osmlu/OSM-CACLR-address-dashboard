@@ -12,5 +12,7 @@ nomaison AS (
     WHERE rue NOT LIKE 'Maison'
     GROUP BY localite
 )
-SELECT count(*) FROM maison, nomaison
-WHERE maison.localite = nomaison.localite;
+SELECT maison.localite
+FROM maison
+JOIN nomaison ON maison.localite = nomaison.localite
+ORDER BY maison.localite;
