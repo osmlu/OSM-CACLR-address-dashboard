@@ -79,7 +79,6 @@ class Dashboard:
         self.conn_params = {
             "port": self.config.getint("database", "port", fallback=5432),
             "dbname": self.config.get("database", "dbname"),
-            "autoescape": True,
             "application_name": "osm-caclr-dashboard",
             "user": self.config.get("database", "user"),
         }
