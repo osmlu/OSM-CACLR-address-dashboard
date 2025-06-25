@@ -10,7 +10,7 @@
 </thead>
 <tbody>
 {% for metric in metrics %}
-<tr class="toggle" data-target="d-{{ metric.slug }}" data-value="{{ metric.value }}">
+<tr class="toggle{% if metric.value == 0 %} zero-result{% endif %}" data-target="d-{{ metric.slug }}" data-value="{{ metric.value }}">
   <td><span class="icon">&#9654;</span> {{ metric.title }}</td>
   <td>{{ metric.value }}</td>
   <td>{% if metric.graph %}<img src="{{ metric.graph }}" alt="trend" style="height:40px">{% endif %}</td>
@@ -88,9 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
     hideZero = !hideZero;
     btnZero.textContent = hideZero ? 'Show Zero Results' : 'Hide Zero Results';
     document.querySelectorAll('#metrics-table tbody tr.toggle').forEach(row => {
-      const val = parseInt(row.dataset.value, 10) || 0;
+      const isZero = row.classList.contains('zero-result');
       const detail = document.getElementById(row.dataset.target);
-      if (hideZero && val === 0) {
+      if (hideZero && isZero) {
         row.style.display = 'none';
         detail.style.display = 'none';
       } else {
@@ -134,9 +134,9 @@ btnZero.addEventListener('click', () => {
   hideZero = !hideZero;
   btnZero.textContent = hideZero ? 'Show Zero Results' : 'Hide Zero Results';
   document.querySelectorAll('tbody tr.toggle').forEach(row => {
-    const val = parseInt(row.dataset.value, 10) || 0;
+    const isZero = row.classList.contains('zero-result');
     const detail = document.getElementById(row.dataset.target);
-    if (hideZero && val === 0) {
+    if (hideZero && isZero) {
       row.style.display = 'none';
       detail.style.display = 'none';
     } else {
