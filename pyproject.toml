@@ -1,8 +1,11 @@
 [tool.black]
-line-length = 88
+line-length = 99
 
 [tool.ruff]
-line-length = 88
+line-length = 99
+
+[tool.flake8]
+max-line-length = 99
 
 [tool.ruff.lint]
 select = ["E", "F"]
@@ -15,8 +18,4 @@ exclude_rules = "L003"
 name = "osm-caclr-address-dashboard"
 version = "0.0.0"
 requires-python = ">=3.12"
-dependencies = [
-    "psycopg2-binary",
-    "Jinja2",
-    "matplotlib",
-]
+dependencies = ["psycopg2-binary", "Jinja2", "matplotlib"]

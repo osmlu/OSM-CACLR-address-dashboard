@@ -8,11 +8,11 @@ import datetime as dt
 import glob
 import os
 from configparser import ConfigParser
-import matplotlib.pyplot as plt
-import matplotlib
 
+import matplotlib
+import matplotlib.pyplot as plt
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from psycopg2.pool import ThreadedConnectionPool
-from jinja2 import Environment, FileSystemLoader
 
 matplotlib.use("Agg")
 
@@ -68,14 +68,17 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
 class Dashboard:
     """Generate the dashboard from metrics."""
 
-    def __init__(self, config: ConfigParser) -> None:
+    def __init__(self: Dashboard, config: ConfigParser) -> None:
         self.config = config
         self.output_dir = self.config.get("paths", "output_dir", fallback="output")
         self.history_dir = self.config.get("paths", "history_dir", fallback="history")
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.history_dir, exist_ok=True)
         os.makedirs(os.path.join(self.output_dir, "img"), exist_ok=True)
-        self.env = Environment(loader=FileSystemLoader("templates"))
+        self.env = Environment(
+            loader=FileSystemLoader("templates", encoding="utf-8"),
+            autoescape=select_autoescape(["html", "xml"]),
+        )
         self.conn_params = {
             "port": self.config.getint("database", "port", fallback=5432),
             "dbname": self.config.get("database", "dbname"),
@@ -91,7 +94,7 @@ class Dashboard:
         max_conn = self.config.getint("database", "max_connections", fallback=32)
         self.pool = ThreadedConnectionPool(1, max_conn, **self.conn_params)
 
-    def run(self) -> None:
+    def run(self: Dashboard) -> None:
         metric_dir = self.config.get("paths", "metrics_dir", fallback="metrics")
         include_dir = self.config.get("paths", "includes_dir", fallback="includes")
         metrics = []
@@ -133,17 +136,15 @@ class Dashboard:
                     "value": value,
                     "graph": graph,
                     "details": details,
-                }
+                },
             )
         template = self.env.get_template("dashboard.html")
         html = template.render(metrics=metrics)
-        with open(
-            os.path.join(self.output_dir, "index.html"), "w", encoding="utf-8"
-        ) as fh:
+        with open(os.path.join(self.output_dir, "index.html"), "w", encoding="utf-8") as fh:
             fh.write(html)
         self.pool.closeall()
 
-    def _fetch_rows(self, sql: str) -> tuple[list[tuple], list[str]]:
+    def _fetch_rows(self: Dashboard, sql: str) -> tuple[list[tuple], list[str]]:
         conn = self.pool.getconn()
         try:
             with conn.cursor() as cur:
@@ -154,7 +155,7 @@ class Dashboard:
             self.pool.putconn(conn)
         return rows, headers
 
-    def _update_history(self, slug: str, value: int) -> None:
+    def _update_history(self: Dashboard, slug: str, value: int) -> None:
         path = os.path.join(self.history_dir, f"{slug}.csv")
         is_new = not os.path.exists(path)
         with open(path, "a", newline="", encoding="utf-8") as fh:
@@ -163,7 +164,7 @@ class Dashboard:
                 writer.writerow(["date", "value"])
             writer.writerow([dt.date.today().isoformat(), value])
 
-    def _plot_history(self, slug: str) -> str | None:
+    def _plot_history(self: Dashboard, slug: str) -> str | None:
         path = os.path.join(self.history_dir, f"{slug}.csv")
         if not os.path.exists(path):
             return None
@@ -188,7 +189,7 @@ class Dashboard:
         plt.close()
         return os.path.relpath(img_path, self.output_dir)
 
-    def _josm_link(self, rows: list[tuple], headers: list[str]) -> str | None:
+    def _josm_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
@@ -202,7 +203,7 @@ class Dashboard:
 
 
 def main() -> None:
-    """Main entry point for the dashboard generation."""
+    """Run dashboard generation."""
     if not os.path.exists(CONFIG_FILE):
         raise FileNotFoundError(f"Configuration file '{CONFIG_FILE}' not found.")
     if not os.path.isfile(CONFIG_FILE):
