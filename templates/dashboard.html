@@ -4,6 +4,7 @@
 <div class="mb-3">
   <button id="toggle-zero" class="button is-small">Hide Zero Results</button>
 </div>
+<div class="table-container">
 <table class="table is-striped is-hoverable" id="metrics-table">
 <thead id="metrics-head">
 <tr><th>Metric</th><th>Value</th><th>Trend</th></tr>
@@ -43,6 +44,7 @@
 {% endfor %}
 </tbody>
 </table>
+</div>
 {% endblock %}
 {% block extra_scripts %}
 <script>
