@@ -11,7 +11,7 @@
 <tbody>
 {% for metric in metrics %}
 <tr class="toggle{% if metric.value == 0 %} zero-result{% endif %}" data-target="d-{{ metric.slug }}" data-value="{{ metric.value }}">
-  <td><span class="icon">&#9654;</span> {{ metric.title }}</td>
+  <td><span class="icon">&#9654;</span> <strong>{{ metric.title }}</strong></td>
   <td>{{ metric.value }}</td>
   <td>{% if metric.graph %}<img src="{{ metric.graph }}" alt="trend" style="height:40px">{% endif %}</td>
 </tr>
