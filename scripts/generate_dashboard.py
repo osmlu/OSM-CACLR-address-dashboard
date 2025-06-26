@@ -8,6 +8,7 @@ import datetime as dt
 import glob
 import os
 from configparser import ConfigParser
+from urllib.parse import quote
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -125,6 +126,7 @@ class Dashboard:
                     "rows": rows,
                     "headers": headers,
                     "josm": self._josm_link(rows, headers),
+                    "overpass": self._overpass_link(rows, headers),
                 }
             self._update_history(slug, value)
             graph = self._plot_history(slug)
@@ -200,6 +202,15 @@ class Dashboard:
             objects.append(f"{prefix}{row[id_idx]}")
         url_tpl = self.config.get("general", "josm_remote_url")
         return url_tpl.format(object_ids=",".join(objects))
+
+    def _overpass_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
+        if "osm_id" not in headers or "osm_type" not in headers:
+            return None
+        id_idx = headers.index("osm_id")
+        type_idx = headers.index("osm_type")
+        parts = [f"{rows[i][type_idx]}({rows[i][id_idx]})" for i in range(len(rows))]
+        query = "[out:json];" + "".join(f"{p};" for p in parts) + "out geom;"
+        return f"https://overpass-turbo.eu/?Q={quote(query)}&R"
 
 
 def main() -> None:

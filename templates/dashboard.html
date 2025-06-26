@@ -19,7 +19,14 @@
   <td colspan="3">
     <p>{{ metric.description }}</p>
     {% if metric.details %}
-    {% if metric.details.josm %}<p><a href="{{ metric.details.josm }}">Load in JOSM</a></p>{% endif %}
+    {% if metric.details.josm %}
+    <p>
+      <a href="{{ metric.details.josm }}">Load in JOSM</a>
+      {% if metric.details.overpass %}|
+      <a href="{{ metric.details.overpass }}">Overpass Turbo</a>
+      {% endif %}
+    </p>
+    {% endif %}
     <div class="table-container">
     <table class="table is-bordered is-narrow is-fullwidth">
       <thead><tr>{% for h in metric.details.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
