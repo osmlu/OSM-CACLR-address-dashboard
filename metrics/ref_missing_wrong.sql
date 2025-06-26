@@ -21,6 +21,7 @@
 SELECT
          osm.osm_id,
          osm.url,
+         osm.josmuid,
          osm."addr:housenumber",
          caclr.numero,
          osm."addr:street",
@@ -29,6 +30,7 @@ SELECT
          caclr.localite,
          osm."note:caclr",
          osm."note",
+         osm."ref:caclr",
          caclr.id_caclr_bat
 FROM     osm_potential_addresses osm,
          addresses caclr

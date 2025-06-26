@@ -19,9 +19,9 @@
 
 select * from (SELECT   osm.*,
          caclr.id_caclr_bat,
-         St_distance(St_centroid(osm.way), St_transform(caclr.geom, 3857)) AS dist,
-         St_transform(caclr.geom, 3857)                                    AS caclr_geom,
-         St_astext(St_shortestline(St_centroid(osm.way), St_transform(caclr.geom, 3857))) as line
+         St_distance(St_transform(St_centroid(osm.way), 2169), St_transform(caclr.geom, 2169)) AS dist,
+         St_transform(caclr.geom, 2169) AS caclr_geom,
+         St_astext(St_shortestline(St_transform(St_centroid(osm.way), 2169), St_transform(caclr.geom, 2169))) as line
 FROM     osm_potential_addresses osm,
          addresses caclr
 WHERE    osm."ref:caclr" IS NULL
