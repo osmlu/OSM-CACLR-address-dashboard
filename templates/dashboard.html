@@ -4,6 +4,7 @@
 <div class="mb-3">
   <button id="toggle-zero" class="button is-small">Hide Zero Results</button>
 </div>
+<div class="table-container">
 <table class="table is-striped is-hoverable" id="metrics-table">
 <thead id="metrics-head">
 <tr><th>Metric</th><th>Value</th><th>Trend</th></tr>
@@ -11,7 +12,7 @@
 <tbody>
 {% for metric in metrics %}
 <tr class="toggle{% if metric.value == 0 %} zero-result{% endif %}" data-target="d-{{ metric.slug }}" data-value="{{ metric.value }}">
-  <td><span class="icon">&#9654;</span> {{ metric.title }}</td>
+  <td><span class="icon">&#9654;</span> <strong>{{ metric.title }}</strong></td>
   <td>{{ metric.value }}</td>
   <td>{% if metric.graph %}<img src="{{ metric.graph }}" alt="trend" style="height:40px">{% endif %}</td>
 </tr>
@@ -43,6 +44,7 @@
 {% endfor %}
 </tbody>
 </table>
+</div>
 {% endblock %}
 {% block extra_scripts %}
 <script>
