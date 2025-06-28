@@ -7,6 +7,7 @@ import csv
 import datetime as dt
 import glob
 import os
+from pathlib import Path
 from configparser import ConfigParser
 from urllib.parse import quote
 
@@ -71,11 +72,11 @@ class Dashboard:
 
     def __init__(self: Dashboard, config: ConfigParser) -> None:
         self.config = config
-        self.output_dir = self.config.get("paths", "output_dir", fallback="output")
-        self.history_dir = self.config.get("paths", "history_dir", fallback="history")
-        os.makedirs(self.output_dir, exist_ok=True)
-        os.makedirs(self.history_dir, exist_ok=True)
-        os.makedirs(os.path.join(self.output_dir, "img"), exist_ok=True)
+        self.output_dir = Path(self.config.get("paths", "output_dir", fallback="output"))
+        self.history_dir = Path(self.config.get("paths", "history_dir", fallback="history"))
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.history_dir.mkdir(parents=True, exist_ok=True)
+        (self.output_dir / "img").mkdir(parents=True, exist_ok=True)
         self.env = Environment(
             loader=FileSystemLoader("templates", encoding="utf-8"),
             autoescape=select_autoescape(["html", "xml"]),
@@ -142,7 +143,7 @@ class Dashboard:
             )
         template = self.env.get_template("dashboard.html")
         html = template.render(metrics=metrics)
-        with open(os.path.join(self.output_dir, "index.html"), "w", encoding="utf-8") as fh:
+        with (self.output_dir / "index.html").open("w", encoding="utf-8") as fh:
             fh.write(html)
         self.pool.closeall()
 
@@ -158,21 +159,21 @@ class Dashboard:
         return rows, headers
 
     def _update_history(self: Dashboard, slug: str, value: int) -> None:
-        path = os.path.join(self.history_dir, f"{slug}.csv")
-        is_new = not os.path.exists(path)
-        with open(path, "a", newline="", encoding="utf-8") as fh:
+        path = self.history_dir / f"{slug}.csv"
+        is_new = not path.exists()
+        with path.open("a", newline="", encoding="utf-8") as fh:
             writer = csv.writer(fh)
             if is_new:
                 writer.writerow(["date", "value"])
             writer.writerow([dt.date.today().isoformat(), value])
 
     def _plot_history(self: Dashboard, slug: str) -> str | None:
-        path = os.path.join(self.history_dir, f"{slug}.csv")
-        if not os.path.exists(path):
+        path = self.history_dir / f"{slug}.csv"
+        if not path.exists():
             return None
         dates, values = [], []
         try:
-            with open(path, encoding="utf-8") as fh:
+            with path.open(encoding="utf-8") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
                     dates.append(dt.datetime.fromisoformat(row["date"]))
@@ -186,10 +187,10 @@ class Dashboard:
         plt.xticks([])
         plt.yticks([])
         plt.tight_layout()
-        img_path = os.path.join(self.output_dir, "img", f"{slug}.png")
+        img_path = self.output_dir / "img" / f"{slug}.png"
         plt.savefig(img_path)
         plt.close()
-        return os.path.relpath(img_path, self.output_dir)
+        return str(img_path.relative_to(self.output_dir))
 
     def _josm_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
