@@ -16,7 +16,7 @@ jobs:
       - name: Install packages
         run: uv sync
       - name: Type check
-        run: uv run ty check .
+        run: uvx ty check .
       - name: Format SQL
-        run: uv run sqlfluff fix metrics --dialect postgres --force
+        run: uvx sqlfluff fix metrics --dialect postgres --force
         continue-on-error: true
