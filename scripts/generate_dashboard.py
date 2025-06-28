@@ -28,7 +28,8 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
     Returns list of (slug, title, description, sql) tuples.
     """
     metrics: list[tuple[str, str, str, str]] = []
-    for path in sorted(glob.glob(os.path.join(metric_dir, "*.sql"), recursive=True)):
+    pattern = os.path.join(metric_dir, "**", "*.sql")
+    for path in sorted(glob.glob(pattern, recursive=True)):
         slug = os.path.splitext(os.path.basename(path))[0]
         with open(path, encoding="utf-8") as fh:
             lines = fh.readlines()

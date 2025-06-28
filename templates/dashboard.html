@@ -109,50 +109,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-
-const table = document.getElementById('metrics-table');
-const headers = document.querySelectorAll('#metrics-head th');
-const sortState = Array.from(headers, () => false);
-headers.forEach((th, idx) => {
-  th.style.cursor = 'pointer';
-  th.addEventListener('click', () => {
-    sortState[idx] = !sortState[idx];
-    const asc = sortState[idx];
-    const rows = Array.from(table.tBodies[0].querySelectorAll('tr.toggle'));
-    rows.sort((a, b) => {
-      let aText = a.children[idx].textContent.trim();
-      let bText = b.children[idx].textContent.trim();
-      if (idx === 1) {
-        aText = parseFloat(aText);
-        bText = parseFloat(bText);
-        return (aText - bText) * (asc ? 1 : -1);
-      }
-      return aText.localeCompare(bText) * (asc ? 1 : -1);
-    });
-    rows.forEach(r => {
-      const detail = document.getElementById(r.dataset.target);
-      table.tBodies[0].appendChild(r);
-      table.tBodies[0].appendChild(detail);
-    });
-  });
-});
-
-const btnZero = document.getElementById('toggle-zero');
-let hideZero = false;
-btnZero.addEventListener('click', () => {
-  hideZero = !hideZero;
-  btnZero.textContent = hideZero ? 'Show Zero Results' : 'Hide Zero Results';
-  document.querySelectorAll('tbody tr.toggle').forEach(row => {
-    const isZero = row.classList.contains('zero-result');
-    const detail = document.getElementById(row.dataset.target);
-    if (hideZero && isZero) {
-      row.style.display = 'none';
-      detail.style.display = 'none';
-    } else {
-      row.style.display = '';
-      detail.style.display = detail.classList.contains('is-hidden') ? 'none' : '';
-    }
-  });
-});
 </script>
 {% endblock %}
