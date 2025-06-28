@@ -1,7 +1,8 @@
 -- Title: Missing CACLR reference
 -- Description: ref:caclr values present in OSM but not in the official dataset
 -- include osm_potential_addresses.sql
-SELECT osm_id,
+SELECT
+osm_id,
        osm_type,
        url,
        josmuid,

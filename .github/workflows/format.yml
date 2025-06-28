@@ -11,7 +11,7 @@ jobs:
       - uses: psf/black@stable
         with:
           options: "--check"
-      - uses: jitsucom/sqlfluff-action@v1
-        with:
-          dialect: postgres
-          paths: "metrics/**/*.sql"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Format SQL
+        run: uvx sqlfluff fix metrics --dialect postgres --force

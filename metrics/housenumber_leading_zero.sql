@@ -1,7 +1,8 @@
 -- Title: Leading zero housenumbers
 -- Description: Housenumbers starting with zero
 -- include osm_potential_addresses.sql
-SELECT osm_id,
+SELECT
+osm_id,
        osm_type,
        url,
        josmuid,
