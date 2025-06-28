@@ -13,6 +13,17 @@ def test_load_metrics():
         assert isinstance(desc, str)
 
 
+def test_load_metrics_supports_subdirectories(tmp_path):
+    metrics_dir = tmp_path / "metrics"
+    nested = metrics_dir / "nested"
+    os.makedirs(nested)
+    sql_path = nested / "a.sql"
+    with open(sql_path, "w", encoding="utf-8") as fh:
+        fh.write("-- title: A\n-- description: test\nselect 1;\n")
+    loaded = load_metrics(str(metrics_dir), "includes")
+    assert any(slug == "a" for slug, *_ in loaded)
+
+
 def test_osm_potential_addresses_imports():
     for path in glob.glob(os.path.join("metrics", "**", "*.sql"), recursive=True):
         with open(path) as fh:

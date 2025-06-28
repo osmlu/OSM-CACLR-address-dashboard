@@ -6,7 +6,8 @@ The code targets **Python 3.12** and uses the [uv](https://github.com/astral-sh
 ## Configuration
 
 Copy `config.ini` and adapt the database connection settings and output paths.
-The configuration file is read automatically when running the scripts. It also
+The configuration file is read automatically when running the scripts. You can
+override its location by setting the `DASHBOARD_CONFIG` environment variable. It also
 contains paths for the output directory, history data and the locations of the
 metric SQL files and includes. Connection parameters like `host` and `password`
 may be left blank when using socket based authentication.
@@ -59,5 +60,5 @@ The scripts expect two tables to be available:
 `geom` (geometry in EPSG:4326) and optional `lat_wgs84`/`lon_wgs84` numeric
 columns.
 
-`parcelles` with a primary key `id_parcell` and a polygon column
+`parcelles` with a primary key `id_parcelle` and a polygon column
 `wkb_geometry` in EPSG:4326 used when checking wrong parcel matches.
