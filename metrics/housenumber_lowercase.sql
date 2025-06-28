@@ -1,7 +1,8 @@
 -- Title: Lowercase housenumbers
 -- Description: Housenumbers containing lowercase letters
 -- include osm_potential_addresses.sql
-SELECT osm_id,
+SELECT
+osm_id,
        osm_type,
        url,
        josmuid,

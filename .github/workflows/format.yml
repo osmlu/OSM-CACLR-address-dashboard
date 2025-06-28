@@ -11,7 +11,7 @@ jobs:
       - uses: psf/black@stable
         with:
           options: "--check"
-      - uses: jitsucom/sqlfluff-action@v1
-        with:
-          dialect: postgres
-          paths: "metrics/**/*.sql"
+      - name: Format SQL
+        run: |
+          pip install sqlfluff
+          sqlfluff fix metrics --dialect postgres --force

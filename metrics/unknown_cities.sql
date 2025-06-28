@@ -1,7 +1,8 @@
 -- Title: Unknown cities
 -- Description: OSM addresses with a city not present in CACLR
 -- include osm_potential_addresses.sql
-SELECT osm_id,
+SELECT
+osm_id,
        osm_type,
        url,
        josmuid,

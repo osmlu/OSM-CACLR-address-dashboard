@@ -1,7 +1,8 @@
 -- Title: Semicolon in housenumbers
 -- Description: Housenumbers containing semicolons
 -- include osm_potential_addresses.sql
-SELECT osm_id,
+SELECT
+osm_id,
        osm_type,
        url,
        josmuid,

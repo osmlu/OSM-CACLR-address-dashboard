@@ -1,7 +1,8 @@
 -- Title: Invalid street/postcode
 -- Description: Street and postcode pairs that do not exist in CACLR
 -- include osm_potential_addresses.sql
-SELECT osm_id,
+SELECT
+osm_id,
        osm_type,
        url,
        josmuid,
@@ -13,5 +14,8 @@ SELECT osm_id,
        "note:caclr"
 FROM osm_potential_addresses
 WHERE ("addr:street", "addr:postcode") NOT IN (
-    SELECT rue, code_postal::text FROM addresses
+    SELECT
+rue,
+code_postal::text
+FROM addresses
 );

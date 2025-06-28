@@ -1,6 +1,7 @@
 -- Title: Missing city
 -- Description: OSM addresses lacking a city tag
-SELECT osm_id,
+SELECT
+osm_id,
        'node' AS osm_type,
        concat('https://osm.org/node/', osm_id) AS url,
        concat('n', osm_id) AS josmuid,
@@ -11,7 +12,8 @@ SELECT osm_id,
 FROM planet_osm_point
 WHERE "addr:housenumber" IS NOT NULL AND "addr:city" IS NULL
 UNION
-SELECT osm_id,
+SELECT
+osm_id,
        'way' AS osm_type,
        concat('https://osm.org/way/', osm_id) AS url,
        concat('w', osm_id) AS josmuid,

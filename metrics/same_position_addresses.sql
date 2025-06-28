@@ -1,7 +1,9 @@
 -- Title: Context: Agglutinated addresses
 -- Description: Multiple addresses in CACLR sharing identical coordinates
 SELECT count(*) FROM (
-    SELECT lat_wgs84, lon_wgs84
+    SELECT
+lat_wgs84,
+lon_wgs84
     FROM addresses
     GROUP BY lat_wgs84, lon_wgs84
     HAVING count(*) > 1
