@@ -25,10 +25,10 @@ the title and one for the description. These are shown on the dashboard.
 ./scripts/generate_dashboard.py
 ```
 
-This will create `index.html` and small trend graphs inside the directory
-specified by `output_dir` in the configuration file. Each metric row can be
-expanded to show the underlying rows, and if the query returns OSM IDs a "Load
-in JOSM" link is offered. The script uses an
+This will create `index.html` with dynamic trend graphs powered by Chart.js
+inside the directory specified by `output_dir` in the configuration file.
+Each metric row can be expanded to show the underlying rows, and if the
+query returns OSM IDs a "Load in JOSM" link is offered. The script uses an
 [uv](https://github.com/astral-sh/uv) shebang to automatically install its Python dependencies.
 Queries run concurrently so the dashboard builds quickly.
 

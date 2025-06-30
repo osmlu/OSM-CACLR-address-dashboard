@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+    :root {
+        --chart-line-light: #3273dc;
+        --chart-line-dark: #68a0e5;
+    }
     .zero-result td {
         color: #666;
         font-size: 0.9em;
@@ -14,6 +19,10 @@
         .zero-result td {
             color: #aaa;
         }
+        :root { --chart-line: var(--chart-line-dark); }
+    }
+    @media (prefers-color-scheme: light) {
+        :root { --chart-line: var(--chart-line-light); }
     }
     .table-container {
         display: block;
