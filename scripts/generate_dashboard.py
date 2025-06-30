@@ -117,6 +117,7 @@ class Dashboard:
         self.pool = ThreadedConnectionPool(1, max_conn, **self.conn_params)
 
     def run(self: Dashboard) -> None:
+        """Run the dashboard generation with all metrics."""
         metric_dir = self.config.get("paths", "metrics_dir", fallback="metrics")
         include_dir = self.config.get("paths", "includes_dir", fallback="includes")
         metrics = []
