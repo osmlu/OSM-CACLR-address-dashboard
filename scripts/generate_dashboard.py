@@ -8,6 +8,7 @@ import datetime as dt
 import glob
 import logging
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path
@@ -132,7 +133,6 @@ class Dashboard:
             (dt.datetime.now() - start).total_seconds(),
         )
         results: list[tuple[Metric, list[tuple], list[str]]] = []
-        from concurrent.futures import ThreadPoolExecutor, as_completed
 
         with ThreadPoolExecutor() as exe:
             futs = {
