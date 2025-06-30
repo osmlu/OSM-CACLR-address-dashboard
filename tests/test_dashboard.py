@@ -63,9 +63,10 @@ def test_history_and_plot(tmp_path):
     assert os.path.exists(hist)
     assert dash._plot_history("m") is None
     dash._update_history("m", 3)
-    graph = dash._plot_history("m")
-    assert graph is not None
-    assert os.path.exists(os.path.join(dash.output_dir, graph))
+    data = dash._plot_history("m")
+    assert data is not None
+    assert data["values"] == [5, 3]
+    assert len(data["dates"]) == 2
 
 
 def test_run_creates_html(tmp_path, caplog):

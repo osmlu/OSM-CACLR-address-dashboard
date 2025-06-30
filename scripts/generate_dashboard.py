@@ -14,13 +14,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
 
-import matplotlib
-import matplotlib.pyplot as plt
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from psycopg2.pool import ThreadedConnectionPool
 from rich.logging import RichHandler
-
-matplotlib.use("Agg")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -101,7 +97,6 @@ class Dashboard:
         self.history_dir = Path(self.config.get("paths", "history_dir", fallback="history"))
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.history_dir.mkdir(parents=True, exist_ok=True)
-        (self.output_dir / "img").mkdir(parents=True, exist_ok=True)
         self.env = Environment(
             loader=FileSystemLoader("templates", encoding="utf-8"),
             autoescape=select_autoescape(["html", "xml"]),
@@ -209,30 +204,23 @@ class Dashboard:
                 writer.writerow(["date", "value"])
             writer.writerow([dt.date.today().isoformat(), value])
 
-    def _plot_history(self: Dashboard, slug: str) -> str | None:
+    def _plot_history(self: Dashboard, slug: str) -> dict[str, list] | None:
         path = self.history_dir / f"{slug}.csv"
         if not path.exists():
             return None
-        dates, values = [], []
+        dates: list[str] = []
+        values: list[int] = []
         try:
             with path.open(encoding="utf-8") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
-                    dates.append(dt.datetime.fromisoformat(row["date"]))
+                    dates.append(row["date"])
                     values.append(int(row["value"]))
-        except (csv.Error, ValueError) as exc:
+        except (csv.Error, ValueError, TypeError, KeyError) as exc:
             raise RuntimeError(f"error reading history for '{slug}': {exc}") from exc
         if len(values) < 2:
             return None
-        plt.figure(figsize=(2.5, 1))
-        plt.plot(dates, values, marker="o", linewidth=1, markersize=2)
-        plt.xticks([])
-        plt.yticks([])
-        plt.tight_layout()
-        img_path = self.output_dir / "img" / f"{slug}.png"
-        plt.savefig(img_path)
-        plt.close()
-        return str(img_path.relative_to(self.output_dir))
+        return {"dates": dates, "values": values}
 
     def _josm_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
