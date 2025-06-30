@@ -18,7 +18,7 @@ WITH osm_potential_addresses AS (
            fixme
     FROM planet_osm_point
     WHERE "addr:street" IS NOT NULL
-    UNION
+    UNION ALL
     SELECT osm_id,
            'way' AS osm_type,
            osm_user,

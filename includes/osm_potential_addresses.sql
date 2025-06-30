@@ -21,7 +21,7 @@ WITH osm_potential_addresses AS (
       AND "addr:street" IS NOT NULL
       AND "addr:postcode" IS NOT NULL
       AND "addr:city" IS NOT NULL
-    UNION
+    UNION ALL
     SELECT osm_id,
            'way' AS osm_type,
            osm_user,
