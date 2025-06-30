@@ -1,6 +1,6 @@
 -- Title: Far matches
 -- Description: OSM addresses matching CACLR but located more than 30m away
--- include osm_potential_addresses.sql
+-- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
 

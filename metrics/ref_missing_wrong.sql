@@ -1,6 +1,6 @@
 -- Title: Possibly incorrect missing ref
 -- Description: Objects tagged ref:caclr=missing but overlapping a CACLR address
--- include osm_potential_addresses.sql
+-- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
 

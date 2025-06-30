@@ -1,6 +1,6 @@
 -- Title: Wrong parcel matches
 -- Description: OSM addresses matching CACLR but placed in a different parcel
--- include osm_potential_addresses.sql
+-- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
 
