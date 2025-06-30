@@ -68,5 +68,6 @@ SELECT
 FROM osm_potential_addresses AS osm,
          addresses AS caclr
 WHERE osm."ref:caclr" LIKE 'missing'
-AND st_intersects(osm.way, st_transform(caclr.geom, 3857))
+AND osm.way && caclr.geom_3857
+AND st_intersects(osm.way, caclr.geom_3857)
 ORDER BY localite, rue, numero;
