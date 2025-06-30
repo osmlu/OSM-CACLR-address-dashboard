@@ -2,6 +2,8 @@ import os
 from configparser import ConfigParser
 from unittest.mock import patch
 
+import pytest
+
 from scripts.generate_dashboard import Dashboard
 
 
@@ -75,3 +77,26 @@ def test_run_creates_html(tmp_path):
         dash.run()
     index = os.path.join(cfg["paths"]["output_dir"], "index.html")
     assert os.path.exists(index)
+
+
+def test_plot_history_corrupted_file(tmp_path):
+    dash = make_dashboard(make_config(tmp_path))
+    slug = "bad"
+    dash._update_history(slug, 1)
+    hist = dash.history_dir / f"{slug}.csv"
+    with hist.open("a", encoding="utf-8") as fh:
+        fh.write("bad_line\n")
+    with pytest.raises(RuntimeError):
+        dash._plot_history(slug)
+
+
+def test_update_history_no_duplicate_headers(tmp_path):
+    dash = make_dashboard(make_config(tmp_path))
+    slug = "dup"
+    dash._update_history(slug, 1)
+    dash._update_history(slug, 2)
+    hist = dash.history_dir / f"{slug}.csv"
+    with hist.open(encoding="utf-8") as fh:
+        lines = [line.strip() for line in fh.readlines()]
+    assert lines[0] == "date,value"
+    assert lines.count("date,value") == 1
