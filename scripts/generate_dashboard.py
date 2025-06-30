@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import logging
+from rich.logging import RichHandler
 
 import csv
 import datetime as dt
@@ -21,11 +22,11 @@ from psycopg2.pool import ThreadedConnectionPool
 
 matplotlib.use("Agg")
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-CYAN = "\x1b[36m"
-BLUE = "\x1b[34m"
-GREEN = "\x1b[32m"
-RESET = "\x1b[0m"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(markup=True, rich_tracebacks=True)],
+)
 
 # Default configuration file path
 CONFIG_FILE = os.environ.get("DASHBOARD_CONFIG", "config.ini")
@@ -127,11 +128,9 @@ class Dashboard:
         start = dt.datetime.now()
         metric_defs = list(load_metrics(metric_dir, include_dir))
         logging.info(
-            "%sLoaded %d metrics in %.2fs%s",
-            CYAN,
+            "[cyan]Loaded %d metrics in %.2fs[/cyan]",
             len(metric_defs),
             (dt.datetime.now() - start).total_seconds(),
-            RESET,
         )
         results: list[tuple[Metric, list[tuple], list[str]]] = []
         from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -147,12 +146,10 @@ class Dashboard:
                 except Exception as exc:  # pragma: no cover - passthrough
                     raise RuntimeError(f"error in metric '{metric.slug}': {exc}") from exc
                 logging.info(
-                    "%sQuery '%s' returned %d rows in %.2fs%s",
-                    BLUE,
+                    "[blue]Query '%s' returned %d rows in %.2fs[/blue]",
                     metric.slug,
                     len(rows),
                     (dt.datetime.now() - start_t).total_seconds(),
-                    RESET,
                 )
                 results.append((metric, rows, headers))
 
@@ -187,11 +184,9 @@ class Dashboard:
         with out_file.open("w", encoding="utf-8") as fh:
             fh.write(html)
         logging.info(
-            "%sWrote HTML in %.2fs to %s%s",
-            GREEN,
+            "[green]Wrote HTML in %.2fs to %s[/green]",
             (dt.datetime.now() - start).total_seconds(),
             out_file,
-            RESET,
         )
         self.pool.closeall()
 
