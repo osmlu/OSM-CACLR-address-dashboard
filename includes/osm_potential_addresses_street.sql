@@ -18,10 +18,7 @@ WITH osm_potential_addresses AS (
            fixme,
            way
     FROM planet_osm_point
-    WHERE "addr:housenumber" IS NOT NULL
-      AND "addr:street" IS NOT NULL
-      AND "addr:postcode" IS NOT NULL
-      AND "addr:city" IS NOT NULL
+    WHERE "addr:street" IS NOT NULL
     UNION
     SELECT osm_id,
            'way' AS osm_type,
@@ -42,8 +39,5 @@ WITH osm_potential_addresses AS (
            fixme,
            way
     FROM planet_osm_polygon
-    WHERE "addr:housenumber" IS NOT NULL
-      AND "addr:street" IS NOT NULL
-      AND "addr:postcode" IS NOT NULL
-      AND "addr:city" IS NOT NULL
+    WHERE "addr:street" IS NOT NULL
 )

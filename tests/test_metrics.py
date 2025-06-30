@@ -34,6 +34,7 @@ def test_osm_potential_addresses_imports():
             lower = content.lower()
             assert (
                 "-- include osm_potential_addresses.sql" in lower
+                or "-- include osm_potential_addresses_street.sql" in lower
                 or "with osm_potential_addresses" in lower
             ), f"{path} missing osm_potential_addresses snippet"
 
@@ -44,7 +45,11 @@ def test_load_metrics_includes_osm_addresses():
         with open(path) as fh:
             content = fh.read()
         slug = os.path.splitext(os.path.basename(path))[0]
-        if "-- include osm_potential_addresses.sql" in content.lower():
+        lower_content = content.lower()
+        if (
+            "-- include osm_potential_addresses.sql" in lower_content
+            or "-- include osm_potential_addresses_street.sql" in lower_content
+        ):
             assert "with osm_potential_addresses" in metric_map[slug].lower()
 
 
