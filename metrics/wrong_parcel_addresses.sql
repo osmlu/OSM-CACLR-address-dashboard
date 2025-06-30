@@ -58,12 +58,11 @@ SELECT * FROM (SELECT
          parcelles.*,
          caclr.id_caclr_bat,
          round(
-             st_distance(st_centroid(osm.way), st_transform(caclr.geom, 3857))
+             st_distance(st_centroid(osm.way), caclr.geom_3857)
          ) AS dist,
-         st_transform(caclr.geom, 3857) AS caclr_geom,
          st_astext(
              st_shortestline(
-                 st_centroid(osm.way), st_transform(caclr.geom, 3857)
+                 st_centroid(osm.way), caclr.geom_3857
              )
          ) AS line
 FROM osm_potential_addresses AS osm,
@@ -75,6 +74,6 @@ AND osm."addr:city" = caclr.localite
 AND osm."addr:postcode" = caclr.code_postal::text
 AND osm."addr:street" = caclr.rue
 AND caclr.id_parcelle = parcelles.id_parcell
-AND NOT st_intersects(osm.way, st_transform(parcelles.wkb_geometry, 3857))
+AND NOT st_intersects(osm.way, parcelles.wkb_geometry)
 ORDER BY dist DESC) AS foo
 WHERE dist > 10;
