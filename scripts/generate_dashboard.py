@@ -3,13 +3,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-import logging
-from rich.logging import RichHandler
-
 import csv
 import datetime as dt
 import glob
+import logging
 import os
 from configparser import ConfigParser
 from dataclasses import dataclass
@@ -20,6 +17,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from psycopg2.pool import ThreadedConnectionPool
+from rich.logging import RichHandler
 
 matplotlib.use("Agg")
 
@@ -33,7 +31,7 @@ logging.basicConfig(
 CONFIG_FILE = os.environ.get("DASHBOARD_CONFIG", "config.ini")
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, kw_only=True)
 class Metric:
     """Simple container for metric properties."""
 
