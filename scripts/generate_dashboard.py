@@ -89,8 +89,12 @@ class Dashboard:
 
     def __init__(self: Dashboard, config: ConfigParser) -> None:
         self.config = config
-        self.output_dir = Path(self.config.get("paths", "output_dir", fallback="output"))
-        self.history_dir = Path(self.config.get("paths", "history_dir", fallback="history"))
+        self.output_dir = Path(
+            self.config.get("paths", "output_dir", fallback="output")
+        )
+        self.history_dir = Path(
+            self.config.get("paths", "history_dir", fallback="history")
+        )
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.history_dir.mkdir(parents=True, exist_ok=True)
         (self.output_dir / "img").mkdir(parents=True, exist_ok=True)
@@ -128,7 +132,9 @@ class Dashboard:
                 try:
                     rows, headers = fut.result()
                 except Exception as exc:  # pragma: no cover - passthrough
-                    raise RuntimeError(f"error in metric '{metric.slug}': {exc}") from exc
+                    raise RuntimeError(
+                        f"error in metric '{metric.slug}': {exc}"
+                    ) from exc
                 results.append((metric, rows, headers))
 
         for metric, rows, headers in sorted(results, key=lambda r: r[0].slug):
@@ -206,7 +212,9 @@ class Dashboard:
         plt.close()
         return str(img_path.relative_to(self.output_dir))
 
-    def _josm_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
+    def _josm_link(
+        self: Dashboard, rows: list[tuple], headers: list[str]
+    ) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
@@ -218,7 +226,9 @@ class Dashboard:
         url_tpl = self.config.get("general", "josm_remote_url")
         return url_tpl.format(object_ids=",".join(objects))
 
-    def _overpass_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
+    def _overpass_link(
+        self: Dashboard, rows: list[tuple], headers: list[str]
+    ) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
