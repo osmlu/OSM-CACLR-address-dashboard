@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import csv
 import datetime as dt
 import glob
@@ -22,12 +24,19 @@ matplotlib.use("Agg")
 CONFIG_FILE = os.environ.get("DASHBOARD_CONFIG", "config.ini")
 
 
-def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str, str]]:
-    """Load metrics from sql files.
+@dataclass(slots=True)
+class Metric:
+    """Simple container for metric properties."""
 
-    Returns list of (slug, title, description, sql) tuples.
-    """
-    metrics: list[tuple[str, str, str, str]] = []
+    slug: str
+    title: str
+    description: str
+    sql: str
+
+
+def load_metrics(metric_dir: str, include_dir: str) -> list[Metric]:
+    """Load metrics from sql files."""
+    metrics: list[Metric] = []
     pattern = os.path.join(metric_dir, "**", "*.sql")
     for path in sorted(glob.glob(pattern, recursive=True)):
         slug = os.path.splitext(os.path.basename(path))[0]
@@ -71,7 +80,7 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
 
         sql = "".join(sql_lines).strip()
 
-        metrics.append((slug, title, description, sql))
+        metrics.append(Metric(slug, title, description, sql))
     return metrics
 
 
@@ -80,8 +89,12 @@ class Dashboard:
 
     def __init__(self: Dashboard, config: ConfigParser) -> None:
         self.config = config
-        self.output_dir = Path(self.config.get("paths", "output_dir", fallback="output"))
-        self.history_dir = Path(self.config.get("paths", "history_dir", fallback="history"))
+        self.output_dir = Path(
+            self.config.get("paths", "output_dir", fallback="output")
+        )
+        self.history_dir = Path(
+            self.config.get("paths", "history_dir", fallback="history")
+        )
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.history_dir.mkdir(parents=True, exist_ok=True)
         (self.output_dir / "img").mkdir(parents=True, exist_ok=True)
@@ -109,23 +122,22 @@ class Dashboard:
         include_dir = self.config.get("paths", "includes_dir", fallback="includes")
         metrics = []
         metric_defs = list(load_metrics(metric_dir, include_dir))
-        results: list[tuple[str, str, str, list[tuple], list[str]]] = []
+        results: list[tuple[Metric, list[tuple], list[str]]] = []
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
         with ThreadPoolExecutor() as exe:
-            futs = {
-                exe.submit(self._fetch_rows, sql): (slug, title, desc)
-                for slug, title, desc, sql in metric_defs
-            }
+            futs = {exe.submit(self._fetch_rows, m.sql): m for m in metric_defs}
             for fut in as_completed(futs):
-                slug, title, desc = futs[fut]
+                metric = futs[fut]
                 try:
                     rows, headers = fut.result()
                 except Exception as exc:  # pragma: no cover - passthrough
-                    raise RuntimeError(f"error in metric '{slug}': {exc}") from exc
-                results.append((slug, title, desc, rows, headers))
+                    raise RuntimeError(
+                        f"error in metric '{metric.slug}': {exc}"
+                    ) from exc
+                results.append((metric, rows, headers))
 
-        for slug, title, desc, rows, headers in sorted(results):
+        for metric, rows, headers in sorted(results, key=lambda r: r[0].slug):
             if len(rows) == 1 and len(headers) == 1:
                 value = int(rows[0][0] or 0)
                 details = None
@@ -137,13 +149,13 @@ class Dashboard:
                     "josm": self._josm_link(rows, headers),
                     "overpass": self._overpass_link(rows, headers),
                 }
-            self._update_history(slug, value)
-            graph = self._plot_history(slug)
+            self._update_history(metric.slug, value)
+            graph = self._plot_history(metric.slug)
             metrics.append(
                 {
-                    "slug": slug,
-                    "title": title,
-                    "description": desc,
+                    "slug": metric.slug,
+                    "title": metric.title,
+                    "description": metric.description,
                     "value": value,
                     "graph": graph,
                     "details": details,
@@ -200,7 +212,9 @@ class Dashboard:
         plt.close()
         return str(img_path.relative_to(self.output_dir))
 
-    def _josm_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
+    def _josm_link(
+        self: Dashboard, rows: list[tuple], headers: list[str]
+    ) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
@@ -212,7 +226,9 @@ class Dashboard:
         url_tpl = self.config.get("general", "josm_remote_url")
         return url_tpl.format(object_ids=",".join(objects))
 
-    def _overpass_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
+    def _overpass_link(
+        self: Dashboard, rows: list[tuple], headers: list[str]
+    ) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
