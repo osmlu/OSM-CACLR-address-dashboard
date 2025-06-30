@@ -121,3 +121,25 @@ def test_run_handles_decimal_results(tmp_path):
         dash.run()
     index = os.path.join(cfg["paths"]["output_dir"], "index.html")
     assert os.path.exists(index)
+
+
+def test_metrics_sorted_zero_last(tmp_path):
+    cfg = make_config(tmp_path)
+    metric_dir = cfg["paths"]["metrics_dir"]
+    with open(os.path.join(metric_dir, "a.sql"), "w", encoding="utf-8") as fh:
+        fh.write("-- Title: A\n-- Description: d\nselect 0 as col;\n")
+    with open(os.path.join(metric_dir, "b.sql"), "w", encoding="utf-8") as fh:
+        fh.write("-- Title: B\n-- Description: d\nselect 1 as col;\n")
+    dash = make_dashboard(cfg)
+
+    def fake_fetch(sql: str):
+        if "select 1" in sql:
+            return ([(1,)], ["col"])
+        return ([(0,)], ["col"])
+
+    with patch.object(dash, "_fetch_rows", side_effect=fake_fetch):
+        dash.run()
+
+    index = os.path.join(cfg["paths"]["output_dir"], "index.html")
+    html = open(index, encoding="utf-8").read()
+    assert html.index("<strong>B</strong>") < html.index("<strong>A</strong>")

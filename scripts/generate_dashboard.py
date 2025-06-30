@@ -173,6 +173,8 @@ class Dashboard:
                     "details": details,
                 },
             )
+
+        metrics.sort(key=lambda m: (m["value"] == 0, m["title"].lower()))
         start = dt.datetime.now()
         template = self.env.get_template("dashboard.html")
         html = template.render(metrics=metrics)
