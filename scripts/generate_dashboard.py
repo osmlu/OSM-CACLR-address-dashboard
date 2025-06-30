@@ -11,8 +11,9 @@ import csv
 import datetime as dt
 import glob
 import os
-from pathlib import Path
 from configparser import ConfigParser
+from dataclasses import dataclass
+from pathlib import Path
 from urllib.parse import quote
 
 import matplotlib
