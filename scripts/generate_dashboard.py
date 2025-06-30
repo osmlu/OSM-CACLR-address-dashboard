@@ -36,6 +36,8 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
 
         title = slug.replace("_", " ").title()
         description = "[No description]"
+        has_title = False
+        has_description = False
         sql_lines: list[str] = []
         header = True
         for line in lines:
@@ -53,14 +55,19 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[tuple[str, str, str,
                 lower = comment.lower()
                 if lower.startswith("title:"):
                     title = comment.split(":", 1)[1].strip()
+                    has_title = True
                 elif lower.startswith("description:"):
                     description = comment.split(":", 1)[1].strip()
+                    has_description = True
                 else:
                     # ignore other comment lines in header
                     pass
                 continue
             header = False
             sql_lines.append(line)
+
+        if not has_title or not has_description:
+            raise ValueError(f"{os.path.basename(path)} missing title or description")
 
         sql = "".join(sql_lines).strip()
 

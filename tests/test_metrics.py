@@ -1,6 +1,8 @@
 import glob
 import os
 
+import pytest
+
 from scripts.generate_dashboard import load_metrics
 
 
@@ -44,3 +46,29 @@ def test_load_metrics_includes_osm_addresses():
         slug = os.path.splitext(os.path.basename(path))[0]
         if "-- include osm_potential_addresses.sql" in content.lower():
             assert "with osm_potential_addresses" in metric_map[slug].lower()
+
+
+def test_load_metrics_missing_header(tmp_path):
+    metric_dir = tmp_path / "metrics"
+    include_dir = tmp_path / "inc"
+    metric_dir.mkdir()
+    include_dir.mkdir()
+
+    metric_path = metric_dir / "a.sql"
+    # Missing title
+    metric_path.write_text("-- Description: desc\nselect 1;", encoding="utf-8")
+    with pytest.raises(ValueError, match="a.sql"):
+        load_metrics(str(metric_dir), str(include_dir))
+
+    # Missing description
+    metric_path.write_text("-- Title: t\nselect 1;", encoding="utf-8")
+    with pytest.raises(ValueError, match="a.sql"):
+        load_metrics(str(metric_dir), str(include_dir))
+
+    # Provide both
+    metric_path.write_text(
+        "-- Title: t\n-- Description: d\nselect 1;",
+        encoding="utf-8",
+    )
+    metrics = load_metrics(str(metric_dir), str(include_dir))
+    assert metrics[0][0] == "a"
