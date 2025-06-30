@@ -69,7 +69,7 @@ def test_run_creates_html(tmp_path):
     cfg = make_config(tmp_path)
     metric_dir = cfg["paths"]["metrics_dir"]
     with open(os.path.join(metric_dir, "a.sql"), "w", encoding="utf-8") as fh:
-        fh.write("select 1 as col;\n")
+        fh.write("-- Title: A\n-- Description: d\nselect 1 as col;\n")
     dash = make_dashboard(cfg)
     with patch.object(dash, "_fetch_rows", return_value=([(1,)], ["col"])):
         dash.run()
