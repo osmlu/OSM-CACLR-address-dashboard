@@ -2,17 +2,21 @@
 -- Description: ref:caclr values present in OSM but not in the official dataset
 -- include osm_potential_addresses.sql
 SELECT
-osm_id,
-       osm_type,
-       url,
-       josmuid,
-       "addr:housenumber",
-       "addr:street",
-       "addr:postcode",
-       "addr:city",
-       "ref:caclr",
-       "note:caclr"
-FROM osm_potential_addresses
-WHERE "ref:caclr" NOT IN ('missing', 'wrong')
-  AND "ref:caclr" NOT IN (SELECT id_caclr_bat FROM addresses)
-ORDER BY "addr:city", "addr:street", "addr:housenumber";
+    opa.osm_id,
+    opa.osm_type,
+    opa.url,
+    opa.josmuid,
+    opa."addr:housenumber",
+    opa."addr:street",
+    opa."addr:postcode",
+    opa."addr:city",
+    opa."ref:caclr",
+    opa."note:caclr"
+FROM osm_potential_addresses AS opa
+LEFT JOIN addresses AS a
+  ON a.id_caclr_bat = opa."ref:caclr"
+WHERE a.id_caclr_bat IS NULL
+ORDER BY
+    opa."addr:city",
+    opa."addr:street",
+    opa."addr:housenumber";
