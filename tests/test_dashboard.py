@@ -1,6 +1,7 @@
 import os
 from configparser import ConfigParser
 from unittest.mock import patch
+import logging
 
 import pytest
 
@@ -67,16 +68,21 @@ def test_history_and_plot(tmp_path):
     assert os.path.exists(os.path.join(dash.output_dir, graph))
 
 
-def test_run_creates_html(tmp_path):
+def test_run_creates_html(tmp_path, caplog):
     cfg = make_config(tmp_path)
     metric_dir = cfg["paths"]["metrics_dir"]
     with open(os.path.join(metric_dir, "a.sql"), "w", encoding="utf-8") as fh:
         fh.write("-- Title: A\n-- Description: d\nselect 1 as col;\n")
     dash = make_dashboard(cfg)
-    with patch.object(dash, "_fetch_rows", return_value=([(1,)], ["col"])):
-        dash.run()
+    with caplog.at_level(logging.INFO):
+        with patch.object(dash, "_fetch_rows", return_value=([(1,)], ["col"])):
+            dash.run()
     index = os.path.join(cfg["paths"]["output_dir"], "index.html")
     assert os.path.exists(index)
+    log_text = caplog.text
+    assert "Loaded 1 metrics" in log_text
+    assert "Query 'a' returned 1 rows" in log_text
+    assert "Wrote HTML" in log_text
 
 
 def test_plot_history_corrupted_file(tmp_path):

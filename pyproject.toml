@@ -24,4 +24,5 @@ dependencies = ["psycopg2-binary", "Jinja2", "matplotlib"]
 dev = [
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
+    "sqlfluff>=3.4.1",
 ]

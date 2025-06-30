@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 
 import csv
 import datetime as dt
@@ -19,6 +20,12 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from psycopg2.pool import ThreadedConnectionPool
 
 matplotlib.use("Agg")
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+CYAN = "\x1b[36m"
+BLUE = "\x1b[34m"
+GREEN = "\x1b[32m"
+RESET = "\x1b[0m"
 
 # Default configuration file path
 CONFIG_FILE = os.environ.get("DASHBOARD_CONFIG", "config.ini")
@@ -89,12 +96,8 @@ class Dashboard:
 
     def __init__(self: Dashboard, config: ConfigParser) -> None:
         self.config = config
-        self.output_dir = Path(
-            self.config.get("paths", "output_dir", fallback="output")
-        )
-        self.history_dir = Path(
-            self.config.get("paths", "history_dir", fallback="history")
-        )
+        self.output_dir = Path(self.config.get("paths", "output_dir", fallback="output"))
+        self.history_dir = Path(self.config.get("paths", "history_dir", fallback="history"))
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.history_dir.mkdir(parents=True, exist_ok=True)
         (self.output_dir / "img").mkdir(parents=True, exist_ok=True)
@@ -121,20 +124,36 @@ class Dashboard:
         metric_dir = self.config.get("paths", "metrics_dir", fallback="metrics")
         include_dir = self.config.get("paths", "includes_dir", fallback="includes")
         metrics = []
+        start = dt.datetime.now()
         metric_defs = list(load_metrics(metric_dir, include_dir))
+        logging.info(
+            "%sLoaded %d metrics in %.2fs%s",
+            CYAN,
+            len(metric_defs),
+            (dt.datetime.now() - start).total_seconds(),
+            RESET,
+        )
         results: list[tuple[Metric, list[tuple], list[str]]] = []
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
         with ThreadPoolExecutor() as exe:
-            futs = {exe.submit(self._fetch_rows, m.sql): m for m in metric_defs}
+            futs = {
+                exe.submit(self._fetch_rows, m.sql): (m, dt.datetime.now()) for m in metric_defs
+            }
             for fut in as_completed(futs):
-                metric = futs[fut]
+                metric, start_t = futs[fut]
                 try:
                     rows, headers = fut.result()
                 except Exception as exc:  # pragma: no cover - passthrough
-                    raise RuntimeError(
-                        f"error in metric '{metric.slug}': {exc}"
-                    ) from exc
+                    raise RuntimeError(f"error in metric '{metric.slug}': {exc}") from exc
+                logging.info(
+                    "%sQuery '%s' returned %d rows in %.2fs%s",
+                    BLUE,
+                    metric.slug,
+                    len(rows),
+                    (dt.datetime.now() - start_t).total_seconds(),
+                    RESET,
+                )
                 results.append((metric, rows, headers))
 
         for metric, rows, headers in sorted(results, key=lambda r: r[0].slug):
@@ -161,10 +180,19 @@ class Dashboard:
                     "details": details,
                 },
             )
+        start = dt.datetime.now()
         template = self.env.get_template("dashboard.html")
         html = template.render(metrics=metrics)
-        with (self.output_dir / "index.html").open("w", encoding="utf-8") as fh:
+        out_file = self.output_dir / "index.html"
+        with out_file.open("w", encoding="utf-8") as fh:
             fh.write(html)
+        logging.info(
+            "%sWrote HTML in %.2fs to %s%s",
+            GREEN,
+            (dt.datetime.now() - start).total_seconds(),
+            out_file,
+            RESET,
+        )
         self.pool.closeall()
 
     def _fetch_rows(self: Dashboard, sql: str) -> tuple[list[tuple], list[str]]:
@@ -212,9 +240,7 @@ class Dashboard:
         plt.close()
         return str(img_path.relative_to(self.output_dir))
 
-    def _josm_link(
-        self: Dashboard, rows: list[tuple], headers: list[str]
-    ) -> str | None:
+    def _josm_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
@@ -226,9 +252,7 @@ class Dashboard:
         url_tpl = self.config.get("general", "josm_remote_url")
         return url_tpl.format(object_ids=",".join(objects))
 
-    def _overpass_link(
-        self: Dashboard, rows: list[tuple], headers: list[str]
-    ) -> str | None:
+    def _overpass_link(self: Dashboard, rows: list[tuple], headers: list[str]) -> str | None:
         if "osm_id" not in headers or "osm_type" not in headers:
             return None
         id_idx = headers.index("osm_id")
