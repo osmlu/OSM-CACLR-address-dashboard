@@ -87,7 +87,7 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[Metric]:
 
         sql = "".join(sql_lines).strip()
 
-        metrics.append(Metric(slug, title, description, sql))
+        metrics.append(Metric(slug=slug, title=title, description=description, sql=sql))
     return metrics
 
 
