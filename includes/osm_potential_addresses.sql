@@ -15,8 +15,7 @@ WITH osm_potential_addresses AS (
            "ref:caclr",
            note,
            "note:caclr",
-           fixme,
-           way
+           fixme
     FROM planet_osm_point
     WHERE "addr:housenumber" IS NOT NULL
       AND "addr:street" IS NOT NULL
@@ -39,8 +38,7 @@ WITH osm_potential_addresses AS (
            "ref:caclr",
            note,
            "note:caclr",
-           fixme,
-           way
+           fixme
     FROM planet_osm_polygon
     WHERE "addr:housenumber" IS NOT NULL
       AND "addr:street" IS NOT NULL
