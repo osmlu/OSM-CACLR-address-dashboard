@@ -26,3 +26,8 @@ Use these commands:
 - Or using uv CLI:
     - `uv add package-name --script script.py`
     - `uv remove package-name --script script.py`
+
+## Validating changes
+
+1. Run agent unit tests with pytest
+2. Format & Lint with ruff, black and sqlfluff
