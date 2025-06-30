@@ -7,10 +7,10 @@ from scripts.generate_dashboard import load_metrics
 def test_load_metrics():
     metrics = load_metrics("metrics", "includes")
     assert metrics
-    for slug, title, desc, sql in metrics:
-        assert slug and sql
-        assert isinstance(title, str)
-        assert isinstance(desc, str)
+    for metric in metrics:
+        assert metric.slug and metric.sql
+        assert isinstance(metric.title, str)
+        assert isinstance(metric.description, str)
 
 
 def test_osm_potential_addresses_imports():
@@ -26,7 +26,7 @@ def test_osm_potential_addresses_imports():
 
 
 def test_load_metrics_includes_osm_addresses():
-    metric_map = {slug: sql for slug, _, _, sql in load_metrics("metrics", "includes")}
+    metric_map = {metric.slug: metric.sql for metric in load_metrics("metrics", "includes")}
     for path in glob.glob(os.path.join("metrics", "**", "*.sql"), recursive=True):
         with open(path) as fh:
             content = fh.read()
