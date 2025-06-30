@@ -23,7 +23,7 @@ def test_load_metrics_supports_subdirectories(tmp_path):
     with open(sql_path, "w", encoding="utf-8") as fh:
         fh.write("-- title: A\n-- description: test\nselect 1;\n")
     loaded = load_metrics(str(metrics_dir), "includes")
-    assert any(slug == "a" for slug, *_ in loaded)
+    assert any(m.slug == "a" for m in loaded)
 
 
 def test_osm_potential_addresses_imports():
@@ -71,4 +71,4 @@ def test_load_metrics_missing_header(tmp_path):
         encoding="utf-8",
     )
     metrics = load_metrics(str(metric_dir), str(include_dir))
-    assert metrics[0][0] == "a"
+    assert metrics[0].slug == "a"
