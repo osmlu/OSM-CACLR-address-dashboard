@@ -107,3 +107,17 @@ def test_update_history_no_duplicate_headers(tmp_path):
         lines = [line.strip() for line in fh.readlines()]
     assert lines[0] == "date,value"
     assert lines.count("date,value") == 1
+
+
+def test_run_handles_decimal_results(tmp_path):
+    cfg = make_config(tmp_path)
+    metric_dir = cfg["paths"]["metrics_dir"]
+    with open(os.path.join(metric_dir, "dec.sql"), "w", encoding="utf-8") as fh:
+        fh.write("-- Title: D\n-- Description: d\nselect 1.5 as col;\n")
+    dash = make_dashboard(cfg)
+    from decimal import Decimal
+
+    with patch.object(dash, "_fetch_rows", return_value=([(Decimal("1.5"),)], ["col"])):
+        dash.run()
+    index = os.path.join(cfg["paths"]["output_dir"], "index.html")
+    assert os.path.exists(index)

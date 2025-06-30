@@ -9,6 +9,7 @@ import glob
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from decimal import Decimal
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path
@@ -192,6 +193,13 @@ class Dashboard:
                 cur.execute(sql)
                 rows = cur.fetchall()
                 headers = [d[0] for d in cur.description]
+                # Convert Decimal values to plain Python types for JSON serialisation
+                converted: list[tuple] = []
+                for row in rows:
+                    converted.append(
+                        tuple(float(val) if isinstance(val, Decimal) else val for val in row)
+                    )
+                rows = converted
         finally:
             self.pool.putconn(conn)
         return rows, headers
