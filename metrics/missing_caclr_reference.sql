@@ -16,7 +16,7 @@ FROM osm_potential_addresses AS opa
 LEFT JOIN addresses AS a
   ON a.id_caclr_bat = opa."ref:caclr"
 WHERE a.id_caclr_bat IS NULL
-AND ref:caclr NOT IN ('missing','wrong'
+AND "ref:caclr" NOT IN ('missing','wrong')
 ORDER BY
     opa."addr:city",
     opa."addr:street",
