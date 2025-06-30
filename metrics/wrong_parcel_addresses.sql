@@ -3,29 +3,84 @@
 -- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
+,
+filtered_osm AS (
+  SELECT
+    osm_id,
+    osm_type,
+    osm_user,
+    url,
+    josmuid,
+    osm_timestamp,
+    name,
+    "addr:housenumber"   AS housenumber,
+    "addr:housename"     AS housename,
+    "addr:street"        AS street,
+    "addr:postcode"      AS postcode,
+    "addr:city"          AS city,
+    "addr:country"       AS country,
+    "ref:caclr",
+    note,
+    "note:caclr",
+    fixme,
+    -- project both centroid & raw geometry into 2169 once
+    st_transform(st_centroid(way), 2169) AS centroid,
+    st_transform(way, 2169)             AS geom2169
+  FROM osm_potential_addresses
+  WHERE "ref:caclr" IS NULL
+),
+addresses_prepped AS (
+  SELECT
+    id_caclr_bat,
+    numero::text       AS housenumber,
+    rue                AS street,
+    code_postal::text  AS postcode,
+    localite           AS city,
+    id_parcelle,
+    st_transform(geom, 2169) AS addr_geom_2169
+  FROM addresses
+),
+parcelles_prepped AS (
+  SELECT
+    id_parcell,
+    st_transform(wkb_geometry, 2169) AS parcelle_geom_2169
+  FROM parcelles
+)
 
-SELECT * FROM (SELECT
-         osm.*,
-         caclr.*,
-         parcelles.*,
-         caclr.id_caclr_bat,
-         round(
-             st_distance(st_centroid(osm.way), caclr.geom_3857)
-         ) AS dist,
-         st_astext(
-             st_shortestline(
-                 st_centroid(osm.way), caclr.geom_3857
-             )
-         ) AS line
-FROM osm_potential_addresses AS osm,
-         addresses AS caclr,
-         parcelles
-WHERE osm."ref:caclr" IS NULL
-AND osm."addr:housenumber" = caclr.numero
-AND osm."addr:city" = caclr.localite
-AND osm."addr:postcode" = caclr.code_postal::text
-AND osm."addr:street" = caclr.rue
-AND caclr.id_parcelle = parcelles.id_parcell
-AND NOT st_intersects(osm.way, parcelles.wkb_geometry)
-ORDER BY dist DESC) AS foo
-WHERE dist > 10;
+SELECT
+  f.osm_id,
+  f.osm_type,
+  f.osm_user,
+  f.url,
+  f.josmuid,
+  f.osm_timestamp,
+  f.name,
+  f.housenumber,
+  f.housename,
+  f.street,
+  f.postcode,
+  f.city,
+  f.country,
+  f."ref:caclr",
+  f.note,
+  f."note:caclr",
+  f.fixme,
+  a.id_caclr_bat,
+  p.id_parcell,
+  round(
+    st_distance(f.centroid, a.addr_geom_2169)
+  ) AS dist,
+  st_astext(
+    st_shortestline(f.centroid, a.addr_geom_2169)
+  ) AS line
+FROM filtered_osm AS f
+JOIN addresses_prepped AS a
+  ON f.housenumber = a.housenumber
+ AND f.street      = a.street
+ AND f.postcode    = a.postcode
+ AND f.city        = a.city
+JOIN parcelles_prepped AS p
+  ON a.id_parcelle = p.id_parcell
+WHERE NOT st_intersects(f.geom2169, p.parcelle_geom_2169)
+  AND st_distance(f.centroid, a.addr_geom_2169) > 10
+ORDER BY dist DESC;

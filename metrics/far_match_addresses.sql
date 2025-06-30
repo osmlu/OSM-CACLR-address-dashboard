@@ -3,27 +3,61 @@
 -- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
+,
+filtered_osm AS (
+    SELECT
+      osm_id,
+      osm_type,
+      osm_user,
+      url,
+      josmuid,
+      osm_timestamp,
+      name,
+      "addr:housenumber"   AS housenumber,
+      "addr:street"        AS street,
+      "addr:postcode"      AS postcode,
+      "addr:city"          AS city,
+      "ref:caclr",
+      note,
+      "note:caclr",
+      st_transform(st_centroid(way), 2169) AS centroid
+    FROM osm_potential_addresses
+    WHERE "ref:caclr" IS NULL
+),
+addresses_prepped AS (
+    SELECT
+      id_caclr_bat,
+      numero::text      AS housenumber,
+      rue               AS street,
+      code_postal::text AS postcode,
+      localite          AS city,
+      st_transform(geom, 2169) AS geom2169
+    FROM addresses
+)
 
-SELECT * FROM (SELECT
-osm.*,
-         caclr.id_caclr_bat,
-         st_distance(
-             st_transform(st_centroid(osm.way), 2169),
-             st_transform(caclr.geom, 2169)
-         ) AS dist,
-         st_transform(caclr.geom, 2169) AS caclr_geom,
-         st_astext(
-             st_shortestline(
-                 st_transform(st_centroid(osm.way), 2169),
-                 st_transform(caclr.geom, 2169)
-             )
-         ) AS line
-FROM osm_potential_addresses AS osm,
-         addresses AS caclr
-WHERE osm."ref:caclr" IS NULL
-AND osm."addr:housenumber" = caclr.numero
-AND osm."addr:city" = caclr.localite
-AND osm."addr:postcode" = caclr.code_postal::text
-AND osm."addr:street" = caclr.rue
-ORDER BY dist DESC) AS foo
-WHERE dist > 30;
+SELECT
+  f.osm_id,
+  f.osm_type,
+  f.osm_user,
+  f.url,
+  f.josmuid,
+  f.osm_timestamp,
+  f.name,
+  f.housenumber,
+  f.street,
+  f.postcode,
+  f.city,
+  f."ref:caclr",
+  f.note,
+  f."note:caclr",
+  a.id_caclr_bat,
+  st_distance(f.centroid, a.geom2169) AS dist,
+  st_astext(st_shortestline(f.centroid, a.geom2169)) AS line
+FROM filtered_osm AS f
+JOIN addresses_prepped AS a
+  ON f.housenumber = a.housenumber
+ AND f.street      = a.street
+ AND f.postcode    = a.postcode
+ AND f.city        = a.city
+WHERE st_distance(f.centroid, a.geom2169) > 30
+ORDER BY dist DESC;
