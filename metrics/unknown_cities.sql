@@ -12,4 +12,7 @@ SELECT
     "ref:caclr",
     "note:caclr"
 FROM osm_potential_addresses
-WHERE "addr:city" NOT IN (SELECT localite FROM addresses);
+WHERE "addr:city" NOT IN (
+    SELECT a.localite
+    FROM addresses AS a
+);

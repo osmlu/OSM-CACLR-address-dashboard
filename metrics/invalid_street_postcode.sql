@@ -15,7 +15,7 @@ SELECT
 FROM osm_potential_addresses
 WHERE ("addr:street", "addr:postcode") NOT IN (
     SELECT
-        rue,
-        code_postal::text
-    FROM addresses
+        a.rue,
+        a.code_postal::text
+    FROM addresses AS a
 );

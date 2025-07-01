@@ -13,4 +13,7 @@ SELECT
     "ref:caclr",
     "note:caclr"
 FROM osm_potential_addresses
-WHERE "addr:postcode" NOT IN (SELECT code_postal::text FROM addresses);
+WHERE "addr:postcode" NOT IN (
+    SELECT a.code_postal::text
+    FROM addresses AS a
+);

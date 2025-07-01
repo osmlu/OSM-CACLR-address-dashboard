@@ -12,5 +12,9 @@ SELECT
     "ref:caclr",
     "note:caclr"
 FROM osm_potential_addresses
-WHERE "addr:street" NOT IN (SELECT rue FROM addresses)
+WHERE
+    "addr:street" NOT IN (
+        SELECT a.rue
+        FROM addresses AS a
+    )
 ORDER BY "addr:street";

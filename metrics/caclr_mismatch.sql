@@ -2,24 +2,24 @@
 -- Description: Addresses tagged with ref:caclr where the street or city differs from the official record
 -- include osm_potential_addresses.sql
 SELECT
-    osm_id,
-    osm_type,
-    url,
-    josmuid,
-    osm_potential_addresses."addr:housenumber",
-    osm_potential_addresses."addr:street" AS osm_street,
-    addresses.rue AS caclr_street,
-    osm_potential_addresses."addr:city" AS osm_city,
-    addresses.localite AS caclr_city,
-    osm_potential_addresses."ref:caclr",
-    osm_potential_addresses."note:caclr"
-FROM osm_potential_addresses
-INNER JOIN
-    addresses
-    ON osm_potential_addresses."ref:caclr" = addresses.id_caclr_bat
+    opa.osm_id,
+    opa.osm_type,
+    opa.url,
+    opa.josmuid,
+    opa."addr:housenumber",
+    opa."addr:street" AS osm_street,
+    a.rue AS caclr_street,
+    opa."addr:city" AS osm_city,
+    a.localite AS caclr_city,
+    opa."ref:caclr",
+    opa."note:caclr"
+FROM osm_potential_addresses AS opa
+INNER JOIN addresses AS a
+    ON opa."ref:caclr" = a.id_caclr_bat
 WHERE
-    osm_potential_addresses."addr:street" != addresses.rue
-    OR osm_potential_addresses."addr:city" != addresses.localite
+    opa."addr:street" != a.rue
+    OR opa."addr:city" != a.localite
 ORDER BY
-    addresses.localite, addresses.rue,
-    osm_potential_addresses."addr:housenumber";
+    a.localite,
+    a.rue,
+    opa."addr:housenumber";

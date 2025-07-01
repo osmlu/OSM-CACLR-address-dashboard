@@ -6,16 +6,17 @@ SELECT
 FROM addresses
 WHERE
     rue NOT IN (
-        SELECT DISTINCT "addr:street"
-        FROM planet_osm_point
-        WHERE "addr:street" IS NOT NULL
+        SELECT DISTINCT p."addr:street"
+        FROM planet_osm_point AS p
+        WHERE p."addr:street" IS NOT NULL
         UNION
-        SELECT DISTINCT "addr:street"
-        FROM planet_osm_polygon
-        WHERE "addr:street" IS NOT NULL
+        SELECT DISTINCT poly."addr:street"
+        FROM planet_osm_polygon AS poly
+        WHERE poly."addr:street" IS NOT NULL
         UNION
-        SELECT DISTINCT name FROM planet_osm_line
-        WHERE name IS NOT NULL
+        SELECT DISTINCT l.name
+        FROM planet_osm_line AS l
+        WHERE l.name IS NOT NULL
     )
 GROUP BY rue
 ORDER BY rue;

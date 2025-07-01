@@ -24,4 +24,7 @@ WHERE
     osm."ref:caclr" LIKE 'missing'
     AND osm.way && caclr.geom_3857
     AND st_intersects(osm.way, caclr.geom_3857)
-ORDER BY localite, rue, numero;
+ORDER BY
+    caclr.localite,
+    caclr.rue,
+    caclr.numero;
