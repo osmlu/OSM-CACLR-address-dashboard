@@ -35,6 +35,7 @@ def test_osm_potential_addresses_imports():
             assert (
                 "-- include osm_potential_addresses.sql" in lower
                 or "-- include osm_potential_addresses_street.sql" in lower
+                or "-- include osm_potential_addresses_withgeom.sql" in lower
                 or "with osm_potential_addresses" in lower
             ), f"{path} missing osm_potential_addresses snippet"
 
