@@ -14,9 +14,10 @@ SELECT
     opa."note:caclr"
 FROM osm_potential_addresses AS opa
 LEFT JOIN addresses AS a
-  ON opa."ref:caclr" = a.id_caclr_bat
-WHERE a.id_caclr_bat IS NULL
-AND "ref:caclr" NOT IN ('missing', 'wrong')
+    ON opa."ref:caclr" = a.id_caclr_bat
+WHERE
+    a.id_caclr_bat IS NULL
+    AND "ref:caclr" NOT IN ('missing', 'wrong')
 ORDER BY
     opa."addr:city",
     opa."addr:street",

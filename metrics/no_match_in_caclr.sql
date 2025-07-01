@@ -3,17 +3,17 @@
 -- include osm_potential_addresses_street.sql
 
 SELECT
-osm_id,
-osm_type,
-url,
-josmuid,
-osm_user,
-       "addr:housenumber" AS numero,
-       "addr:street" AS rue,
-       "addr:postcode" AS codepostal,
-       "addr:city" AS localite,
-       "ref:caclr",
-       "note:caclr"
+    osm_id,
+    osm_type,
+    url,
+    josmuid,
+    osm_user,
+    "addr:housenumber" AS numero,
+    "addr:street" AS rue,
+    "addr:postcode" AS codepostal,
+    "addr:city" AS localite,
+    "ref:caclr",
+    "note:caclr"
 FROM osm_potential_addresses AS osm
 LEFT JOIN
     addresses

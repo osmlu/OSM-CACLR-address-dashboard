@@ -2,10 +2,10 @@
 -- Description: Multiple OSM objects share the same housenumber, street and city
 -- include osm_potential_addresses.sql
 select
-"addr:housenumber",
-"addr:street",
-"addr:city",
-count(*)
+    "addr:housenumber",
+    "addr:street",
+    "addr:city",
+    count(*)
 from osm_potential_addresses
 where "addr:housenumber" is not null
 group by "addr:housenumber", "addr:street", "addr:city"

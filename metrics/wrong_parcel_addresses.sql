@@ -3,6 +3,7 @@
 -- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
+-- comma because we include the osm_potential_addresses_withgeom.sql snippet before this file
 ,
 filtered_osm AS (
   SELECT

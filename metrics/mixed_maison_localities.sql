@@ -2,8 +2,8 @@
 -- Description: Localities in CACLR containing both 'Maison' and regular street addresses
 WITH maison AS (
     SELECT
-localite,
-count(numero) AS numeromaison
+        localite,
+        count(numero) AS numeromaison
     FROM addresses
     WHERE rue LIKE 'Maison'
     GROUP BY localite
@@ -11,8 +11,8 @@ count(numero) AS numeromaison
 
 nomaison AS (
     SELECT
-localite,
-count(numero) AS numeronomaison
+        localite,
+        count(numero) AS numeronomaison
     FROM addresses
     WHERE rue NOT LIKE 'Maison'
     GROUP BY localite

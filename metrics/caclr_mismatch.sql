@@ -17,7 +17,9 @@ FROM osm_potential_addresses
 INNER JOIN
     addresses
     ON osm_potential_addresses."ref:caclr" = addresses.id_caclr_bat
-WHERE osm_potential_addresses."addr:street" != addresses.rue
-   OR osm_potential_addresses."addr:city" != addresses.localite
-ORDER BY addresses.localite, addresses.rue,
-         osm_potential_addresses."addr:housenumber";
+WHERE
+    osm_potential_addresses."addr:street" != addresses.rue
+    OR osm_potential_addresses."addr:city" != addresses.localite
+ORDER BY
+    addresses.localite, addresses.rue,
+    osm_potential_addresses."addr:housenumber";
