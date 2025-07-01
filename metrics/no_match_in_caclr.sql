@@ -3,26 +3,26 @@
 -- include osm_potential_addresses_street.sql
 
 SELECT
-    osm_id,
-    osm_type,
-    url,
-    josmuid,
-    osm_user,
-    "addr:housenumber" AS numero,
-    "addr:street" AS rue,
-    "addr:postcode" AS codepostal,
-    "addr:city" AS localite,
-    "ref:caclr",
-    "note:caclr"
+    osm.osm_id,
+    osm.osm_type,
+    osm.url,
+    osm.josmuid,
+    osm.osm_user,
+    osm."addr:housenumber" AS numero,
+    osm."addr:street" AS rue,
+    osm."addr:postcode" AS codepostal,
+    osm."addr:city" AS localite,
+    osm."ref:caclr",
+    osm."note:caclr"
 FROM osm_potential_addresses AS osm
 LEFT JOIN
-    addresses
+    addresses AS a
     ON
-        osm."addr:housenumber" = addresses.numero
-        AND osm."addr:city" = addresses.localite
-        AND osm."addr:street" = addresses.rue
+        osm."addr:housenumber" = a.numero
+        AND osm."addr:city" = a.localite
+        AND osm."addr:street" = a.rue
 WHERE
-    addresses.localite IS NULL
+    a.localite IS NULL
     AND osm."ref:caclr" IS NULL
     AND osm."addr:housenumber" NOT LIKE '%-%'
 ORDER BY localite, rue, numero;

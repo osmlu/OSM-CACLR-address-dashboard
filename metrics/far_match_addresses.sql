@@ -3,7 +3,7 @@
 -- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
-,
+, -- noqa: PRS
 filtered_osm AS (
     SELECT
       osm_id,

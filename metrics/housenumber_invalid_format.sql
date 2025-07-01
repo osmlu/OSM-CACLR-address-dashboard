@@ -42,4 +42,5 @@ SELECT
     "note:caclr"
 FROM osm_potential_addresses
 WHERE
-    "addr:housenumber" !~ '^[1-9][0-9]{0,2}[A-Z]{0,3}(-*[1-9][0-9]{0,2}[A-Z]{0,3}){0,4}$';
+    "addr:housenumber" !~ '^[1-9][0-9]{0,2}[A-Z]{0,3}'
+    '(-*[1-9][0-9]{0,2}[A-Z]{0,3}){0,4}$';

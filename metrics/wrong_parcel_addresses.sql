@@ -3,8 +3,9 @@
 -- include osm_potential_addresses_withgeom.sql
 
 -- 8< cut here >8 --
--- comma because we include the osm_potential_addresses_withgeom.sql snippet before this file
-,
+-- comma because we include the
+-- osm_potential_addresses_withgeom.sql snippet before this file
+, -- noqa: PRS
 filtered_osm AS (
   SELECT
     osm_id,

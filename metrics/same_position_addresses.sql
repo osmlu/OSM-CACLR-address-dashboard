@@ -1,8 +1,7 @@
 -- Title: Context: addresses agglutinated in CACLR
--- Description: Addresses go on the biggest building of the parcel. If there's more than one address on the parcel, it's a mess, unless they're aligned by hand.
+-- Description: Addresses go on the biggest building of the parcel. If there's more than one address on the parcel, it's a mess unless they're aligned by hand.
 
 SELECT
-    rue,
     rue,
     localite,
     code_postal,
@@ -23,6 +22,5 @@ GROUP BY
     lat_wgs84,
     lon_wgs84,
     commune,
-    localite,
-    rue
+    localite
 HAVING Count(lat_wgs84) > 1

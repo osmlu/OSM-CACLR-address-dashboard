@@ -1,9 +1,16 @@
 -- Title: Context: Missing number on existing street
 -- Description: Addresses without house number in CACLR where the street also has numbered entries
-select * from addresses as ass
-where
-    numero is null
-    and exists (
-        select rue from addresses
-        where numero is not null and id_caclr_rue = ass.id_caclr_rue
+SELECT
+    ass.id_caclr_bat,
+    ass.rue,
+    ass.localite
+FROM addresses AS ass
+WHERE
+    ass.numero IS NULL
+    AND EXISTS (
+        SELECT 1
+        FROM addresses AS b
+        WHERE
+            b.numero IS NOT NULL
+            AND b.id_caclr_rue = ass.id_caclr_rue
     );
