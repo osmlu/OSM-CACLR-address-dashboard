@@ -16,8 +16,8 @@ jobs:
       - name: Install packages
         run: uv sync
       - name: Type check
-        run: uv run ty check .
+        run: uvx ty check .
       - name: Check SQL
-        run: uv run sqlfluff lint metrics --dialect postgres
+        run: uvx sqlfluff lint metrics --dialect postgres
       - name: Format SQL
-        run: uv run sqlfluff fix metrics --dialect postgres
+        run: uvx sqlfluff fix metrics --dialect postgres
