@@ -33,6 +33,10 @@ addresses_prepped AS (
       localite          AS city,
       st_transform(geom, 2169) AS geom2169
     FROM addresses
+),
+immeuble_dates AS (
+    SELECT numero_interne, ds_timestamp_modif
+    FROM immeuble
 )
 
 SELECT
@@ -51,6 +55,7 @@ SELECT
   f.note,
   f."note:caclr",
   a.id_caclr_bat,
+  i.ds_timestamp_modif,
   st_distance(f.centroid, a.geom2169) AS dist,
   st_astext(st_shortestline(f.centroid, a.geom2169)) AS line
 FROM filtered_osm AS f
@@ -59,5 +64,7 @@ JOIN addresses_prepped AS a
  AND f.street      = a.street
  AND f.postcode    = a.postcode
  AND f.city        = a.city
+LEFT JOIN immeuble_dates AS i
+  ON a.id_caclr_bat = i.numero_interne
 WHERE st_distance(f.centroid, a.geom2169) > 30
 ORDER BY dist DESC;

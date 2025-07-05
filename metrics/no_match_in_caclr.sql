@@ -5,6 +5,7 @@
 SELECT
     osm.osm_id,
     osm.osm_type,
+    osm.osm_timestamp,
     osm.url,
     osm.josmuid,
     osm.osm_user,
