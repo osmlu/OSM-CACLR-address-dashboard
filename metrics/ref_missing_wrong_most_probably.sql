@@ -6,6 +6,7 @@
 
 SELECT
     osm.osm_id,
+    osm.osm_timestamp,
     osm.url,
     osm.josmuid,
     osm."addr:housenumber",
@@ -17,13 +18,18 @@ SELECT
     osm."note:caclr",
     osm.note,
     osm."ref:caclr",
-    caclr.id_caclr_bat
-FROM osm_potential_addresses AS osm,
-    addresses AS caclr
+    caclr.id_caclr_bat,
+    i.ds_timestamp_modif
+FROM osm_potential_addresses AS osm
+INNER JOIN addresses AS caclr
+    ON (
+        osm.way && caclr.geom_3857
+        AND st_intersects(osm.way, caclr.geom_3857)
+    )
+LEFT JOIN immeuble AS i
+    ON caclr.id_caclr_bat = i.numero_interne
 WHERE
     osm."ref:caclr" LIKE 'missing'
-    AND osm.way && caclr.geom_3857
-    AND st_intersects(osm.way, caclr.geom_3857)
     AND osm."addr:housenumber" = caclr.numero::text
     AND osm."addr:street" = caclr.rue
 ORDER BY

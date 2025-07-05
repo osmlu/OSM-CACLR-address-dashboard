@@ -11,10 +11,15 @@ SELECT
     opa."addr:postcode",
     opa."addr:city",
     opa."ref:caclr",
-    opa."note:caclr"
+    opa."note:caclr",
+    i.date_fin_valid,
+    i.ds_timestamp_modif,
+    opa.osm_timestamp
 FROM osm_potential_addresses AS opa
 LEFT JOIN addresses AS a
     ON opa."ref:caclr" = a.id_caclr_bat
+LEFT JOIN immeuble AS i
+    ON opa."ref:caclr" = i.numero_interne
 WHERE
     a.id_caclr_bat IS NULL
     AND opa."ref:caclr" NOT IN ('missing', 'wrong')

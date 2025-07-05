@@ -12,10 +12,14 @@ SELECT
     opa."addr:city" AS osm_city,
     a.localite AS caclr_city,
     opa."ref:caclr",
-    opa."note:caclr"
+    opa."note:caclr",
+    i.ds_timestamp_modif,
+    opa.osm_timestamp
 FROM osm_potential_addresses AS opa
 INNER JOIN addresses AS a
     ON opa."ref:caclr" = a.id_caclr_bat
+LEFT JOIN immeuble AS i
+    ON opa."ref:caclr" = i.numero_interne
 WHERE
     opa."addr:street" != a.rue
     OR opa."addr:city" != a.localite
