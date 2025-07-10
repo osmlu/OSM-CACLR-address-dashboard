@@ -89,7 +89,7 @@ JOIN addresses_prepped AS a
 JOIN parcelles_prepped AS p
   ON a.id_parcelle = p.id_parcell
 LEFT JOIN immeuble_dates AS i
-  ON a.id_caclr_bat = i.numero_interne
+  ON a.id_caclr_bat = i.numero_interne::text
 WHERE NOT st_intersects(f.geom2169, p.parcelle_geom_2169)
   AND st_distance(f.centroid, a.addr_geom_2169) > 10
 ORDER BY dist DESC;

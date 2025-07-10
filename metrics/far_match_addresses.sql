@@ -65,6 +65,6 @@ JOIN addresses_prepped AS a
  AND f.postcode    = a.postcode
  AND f.city        = a.city
 LEFT JOIN immeuble_dates AS i
-  ON a.id_caclr_bat = i.numero_interne
+  ON a.id_caclr_bat = i.numero_interne::text
 WHERE st_distance(f.centroid, a.geom2169) > 30
 ORDER BY dist DESC;
