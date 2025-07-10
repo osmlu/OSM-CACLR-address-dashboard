@@ -11,7 +11,8 @@ from __future__ import annotations
 import os
 import subprocess
 from argparse import ArgumentParser
-from configparser import ConfigParser
+from configparser import ConfigParser, SectionProxy
+from typing import Mapping
 from pathlib import Path
 
 CONFIG_FILE = os.environ.get("DASHBOARD_CONFIG", "config.ini")
@@ -27,7 +28,7 @@ TABLES = [
 ]
 
 
-def build_dsn(db: ConfigParser) -> str:
+def build_dsn(db: Mapping[str, str] | SectionProxy) -> str:
     """Build libpq connection string for ogr2ogr."""
     parts = [f"port={db.get('port', '5432')}", f"dbname={db['dbname']}"]
     host = db.get("host")
