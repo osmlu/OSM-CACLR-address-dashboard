@@ -5,7 +5,7 @@ SELECT
     a.id_caclr_bat,
     a.rue,
     a.localite,
-    i.date_debut_valid,
+    i.date_fin_valid,
     i.ds_timestamp_modif,
     opa.osm_timestamp
 FROM addresses AS a
