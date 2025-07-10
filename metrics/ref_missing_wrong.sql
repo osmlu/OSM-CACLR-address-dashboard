@@ -27,7 +27,7 @@ INNER JOIN addresses AS caclr
         AND st_intersects(osm.way, caclr.geom_3857)
     )
 LEFT JOIN immeuble AS i
-    ON caclr.id_caclr_bat = i.numero_interne
+    ON caclr.id_caclr_bat = i.numero_interne::text
 WHERE
     osm."ref:caclr" LIKE 'missing'
 ORDER BY

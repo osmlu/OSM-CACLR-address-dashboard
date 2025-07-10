@@ -19,7 +19,7 @@ FROM osm_potential_addresses AS opa
 LEFT JOIN addresses AS a
     ON opa."ref:caclr" = a.id_caclr_bat
 LEFT JOIN immeuble AS i
-    ON opa."ref:caclr" = i.numero_interne
+    ON opa."ref:caclr" = i.numero_interne::text
 WHERE
     a.id_caclr_bat IS NULL
     AND opa."ref:caclr" NOT IN ('missing', 'wrong')
