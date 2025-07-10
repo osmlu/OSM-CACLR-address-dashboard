@@ -42,6 +42,10 @@ addresses_prepped AS (
     st_transform(geom, 2169) AS addr_geom_2169
   FROM addresses
 ),
+immeuble_dates AS (
+  SELECT numero_interne, ds_timestamp_modif
+  FROM immeuble
+),
 parcelles_prepped AS (
   SELECT
     id_parcell,
@@ -68,6 +72,7 @@ SELECT
   f."note:caclr",
   f.fixme,
   a.id_caclr_bat,
+  i.ds_timestamp_modif,
   p.id_parcell,
   round(
     st_distance(f.centroid, a.addr_geom_2169)
@@ -80,9 +85,11 @@ JOIN addresses_prepped AS a
   ON f.housenumber = a.housenumber
  AND f.street      = a.street
  AND f.postcode    = a.postcode
- AND f.city        = a.city
+  AND f.city        = a.city
 JOIN parcelles_prepped AS p
   ON a.id_parcelle = p.id_parcell
+LEFT JOIN immeuble_dates AS i
+  ON a.id_caclr_bat = i.numero_interne
 WHERE NOT st_intersects(f.geom2169, p.parcelle_geom_2169)
   AND st_distance(f.centroid, a.addr_geom_2169) > 10
 ORDER BY dist DESC;
