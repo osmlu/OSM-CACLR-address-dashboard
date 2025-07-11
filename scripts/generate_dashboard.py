@@ -139,6 +139,7 @@ class Dashboard:
                 metric, start_t = futs[fut]
                 try:
                     rows, headers = fut.result()
+                    rows = self._convert_rows(rows)
                 except Exception as exc:  # pragma: no cover - passthrough
                     raise RuntimeError(f"error in metric '{metric.slug}': {exc}") from exc
                 logging.info(
@@ -195,16 +196,24 @@ class Dashboard:
                 cur.execute(sql)
                 rows = cur.fetchall()
                 headers = [d[0] for d in cur.description]
-                # Convert Decimal values to plain Python types for JSON serialisation
-                converted: list[tuple] = []
-                for row in rows:
-                    converted.append(
-                        tuple(float(val) if isinstance(val, Decimal) else val for val in row)
-                    )
-                rows = converted
         finally:
             self.pool.putconn(conn)
         return rows, headers
+
+    def _convert_rows(self: Dashboard, rows: list[tuple]) -> list[tuple]:
+        """Convert non-JSON serialisable types to basic Python types."""
+        converted: list[tuple] = []
+        for row in rows:
+            new_row = []
+            for val in row:
+                if isinstance(val, Decimal):
+                    new_row.append(float(val))
+                elif isinstance(val, (dt.date, dt.datetime)):
+                    new_row.append(val.isoformat())
+                else:
+                    new_row.append(val)
+            converted.append(tuple(new_row))
+        return converted
 
     def _update_history(self: Dashboard, slug: str, value: int) -> None:
         path = self.history_dir / f"{slug}.csv"
