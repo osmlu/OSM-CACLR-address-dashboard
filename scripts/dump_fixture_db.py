@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run
 """Export dashboard tables from PostGIS to a compressed SpatiaLite file.
 
-This script creates a tiny fixture database by exporting only the rows
+This script creates a small-ish fixture database by exporting only the rows
 needed by the metrics. The OSM part of the dump is © OpenStreetMap
 contributors.
 """
@@ -90,6 +90,7 @@ QUERIES[
               AND ST_Intersects(li.way, p.wkb_geometry)
         )
 """
+
 
 
 def build_dsn(db: Mapping[str, str] | SectionProxy) -> str:
