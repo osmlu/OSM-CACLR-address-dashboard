@@ -123,6 +123,24 @@ def test_run_handles_decimal_results(tmp_path):
     assert os.path.exists(index)
 
 
+def test_run_handles_date_results(tmp_path):
+    cfg = make_config(tmp_path)
+    metric_dir = cfg["paths"]["metrics_dir"]
+    with open(os.path.join(metric_dir, "date.sql"), "w", encoding="utf-8") as fh:
+        fh.write("-- Title: D\n-- Description: d\nselect CURRENT_DATE as col;\n")
+    dash = make_dashboard(cfg)
+    from datetime import date
+
+    with patch.object(
+        dash,
+        "_fetch_rows",
+        return_value=([(date.today(), 1)], ["col", "num"]),
+    ):
+        dash.run()
+    index = os.path.join(cfg["paths"]["output_dir"], "index.html")
+    assert os.path.exists(index)
+
+
 def test_metrics_sorted_zero_last(tmp_path):
     cfg = make_config(tmp_path)
     metric_dir = cfg["paths"]["metrics_dir"]
