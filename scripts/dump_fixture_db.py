@@ -92,7 +92,6 @@ QUERIES[
 """
 
 
-
 def build_dsn(db: Mapping[str, str] | SectionProxy) -> str:
     """Build libpq connection string for ogr2ogr."""
     parts = [f"port={db.get('port', '5432')}", f"dbname={db['dbname']}"]
