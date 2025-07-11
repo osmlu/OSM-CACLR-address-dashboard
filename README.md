@@ -53,18 +53,21 @@ python -m py_compile $(git ls-files '*.py')
 
 ### Test fixture database
 
-The unit tests rely on `tests/fixture.sqlite`, a SpatiaLite dump of the OSM and
-cadastre tables used by the dashboard. Regenerate this file on a server that has
-the full PostGIS stack **and** all relevant data already imported. `ogr2ogr`
-must be built with SpatiaLite support:
+The unit tests rely on `tests/fixture.sqlite.zst`, a compressed SpatiaLite dump
+of the OSM and cadastre tables used by the dashboard. Regenerate this file on a
+server that has the full PostGIS stack **and** all relevant data already
+imported. `ogr2ogr` must be built with SpatiaLite support:
+
 
 ```
 ./scripts/dump_fixture_db.py
 ```
 
 The script reads the regular configuration file to connect to Postgres and
-exports the tables needed by the dashboard. The OpenStreetMap portion of the
-dump is © OpenStreetMap contributors.
+exports only the rows used by the metrics. The resulting SQLite file is then
+compressed with `zstd -19 -T0`, producing `tests/fixture.sqlite.zst`. The
+OpenStreetMap portion of the dump is © OpenStreetMap contributors.
+
 
 ## Database schema
 
