@@ -4,10 +4,16 @@
 from __future__ import annotations
 
 import argparse
-import pysqlite3 as sqlite3
 import re
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, TYPE_CHECKING
+
+import sqlite3 as _sqlite3
+
+if TYPE_CHECKING:
+    sqlite3 = _sqlite3
+else:  # pragma: no cover - runtime override
+    import pysqlite3 as sqlite3  # type: ignore
 
 import sys
 
