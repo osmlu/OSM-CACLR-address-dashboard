@@ -12,6 +12,7 @@ Use these commands:
 - Install dependencies: `uv add <package>`
 - Remove dependencies: `uv remove <package>`
 - Sync dependencies: `uv sync`
+- Run commands from python packages, e.g. black: `uvx black`
 
 ## Running Python Code
 
@@ -24,10 +25,11 @@ Use these commands:
 - Run a Python script with inline metadata (dependencies defined at the top of the file) with: `uv run script.py`
 - You can add or remove dependencies manually from the `dependencies =` section at the top of the script, or
 - Or using uv CLI:
-    - `uv add package-name --script script.py`
-    - `uv remove package-name --script script.py`
+  - `uv add package-name --script script.py`
+  - `uv remove package-name --script script.py`
 
 ## Validating changes
 
 1. Run agent unit tests with pytest
-2. Format & Lint with ruff, black and sqlfluff
+2. Check typing by running `uvx ty check .`
+3. Format & Lint with `uvx ruff`, `uvx black` and `uvx sqlfluff`
