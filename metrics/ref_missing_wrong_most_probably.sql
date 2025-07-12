@@ -5,33 +5,33 @@
 -- 8< cut here >8 --
 
 SELECT
-    osm.osm_id,
-    osm.osm_timestamp,
-    osm.url,
-    osm.josmuid,
-    osm."addr:housenumber",
+    opa.osm_id,
+    opa.osm_timestamp,
+    opa.url,
+    opa.josmuid,
+    opa."addr:housenumber",
     caclr.numero,
-    osm."addr:street",
+    opa."addr:street",
     caclr.rue,
-    osm."addr:city",
+    opa."addr:city",
     caclr.localite,
-    osm."note:caclr",
-    osm.note,
-    osm."ref:caclr",
+    opa."note:caclr",
+    opa.note,
+    opa."ref:caclr",
     caclr.id_caclr_bat,
     i.ds_timestamp_modif
-FROM osm_potential_addresses AS osm
+FROM osm_potential_addresses AS opa
 INNER JOIN addresses AS caclr
     ON (
-        osm.way && caclr.geom_3857
-        AND st_intersects(osm.way, caclr.geom_3857)
+        opa.way && caclr.geom_3857
+        AND st_intersects(opa.way, caclr.geom_3857)
     )
 LEFT JOIN immeuble AS i
     ON caclr.id_caclr_bat = i.numero_interne::text
 WHERE
-    osm."ref:caclr" LIKE 'missing'
-    AND osm."addr:housenumber" = caclr.numero::text
-    AND osm."addr:street" = caclr.rue
+    opa."ref:caclr" LIKE 'missing'
+    AND opa."addr:housenumber" = caclr.numero::text
+    AND opa."addr:street" = caclr.rue
 ORDER BY
     caclr.localite,
     caclr.rue,
