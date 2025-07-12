@@ -33,7 +33,7 @@ ADDR_CONDITION = " OR ".join(
 QUERIES = {
     "addresses": """
         SELECT id_caclr_bat, id_caclr_rue, numero, rue, localite,
-               code_postal, id_parcelle, geom
+               code_postal, id_parcelle, geom, lat_wgs84, lon_wgs84
         FROM addresses
     """,
     "immeuble": """
