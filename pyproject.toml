@@ -22,6 +22,7 @@ dependencies = [
     "psycopg2-binary",
     "Jinja2",
     "rich>=14.0.0",
+    "pysqlite3-binary>=0.5.4",
 ]
 
 [dependency-groups]
