@@ -67,9 +67,7 @@ QUERIES = {
     """,
 }
 
-QUERIES[
-    "parcelles"
-] = f"""
+QUERIES["parcelles"] = f"""
     SELECT p.id_parcell, p.wkb_geometry
     FROM parcelles AS p
     WHERE EXISTS (
