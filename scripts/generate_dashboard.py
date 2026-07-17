@@ -13,6 +13,7 @@ from decimal import Decimal
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -37,6 +38,33 @@ class Metric:
     title: str
     description: str
     sql: str
+
+
+class MetricGraph(TypedDict):
+    """History data rendered for a metric."""
+
+    dates: list[str]
+    values: list[int]
+
+
+class MetricDetails(TypedDict):
+    """Detailed query results rendered for a metric."""
+
+    rows: list[tuple]
+    headers: list[str]
+    josm: str | None
+    overpass: str | None
+
+
+class DashboardMetric(TypedDict):
+    """Metric data passed to the dashboard template."""
+
+    slug: str
+    title: str
+    description: str
+    value: int
+    graph: MetricGraph | None
+    details: MetricDetails | None
 
 
 def load_metrics(metric_dir: str, include_dir: str) -> list[Metric]:
@@ -121,7 +149,7 @@ class Dashboard:
         """Run the dashboard generation with all metrics."""
         metric_dir = self.config.get("paths", "metrics_dir", fallback="metrics")
         include_dir = self.config.get("paths", "includes_dir", fallback="includes")
-        metrics = []
+        metrics: list[DashboardMetric] = []
         start = dt.datetime.now()
         metric_defs = list(load_metrics(metric_dir, include_dir))
         logging.info(
@@ -156,12 +184,12 @@ class Dashboard:
                 details = None
             else:
                 value = len(rows)
-                details = {
-                    "rows": rows,
-                    "headers": headers,
-                    "josm": self._josm_link(rows, headers),
-                    "overpass": self._overpass_link(rows, headers),
-                }
+                details = MetricDetails(
+                    rows=rows,
+                    headers=headers,
+                    josm=self._josm_link(rows, headers),
+                    overpass=self._overpass_link(rows, headers),
+                )
             self._update_history(metric.slug, value)
             graph = self._plot_history(metric.slug)
             metrics.append(
@@ -224,7 +252,7 @@ class Dashboard:
                 writer.writerow(["date", "value"])
             writer.writerow([dt.date.today().isoformat(), value])
 
-    def _plot_history(self: Dashboard, slug: str) -> dict[str, list] | None:
+    def _plot_history(self: Dashboard, slug: str) -> MetricGraph | None:
         path = self.history_dir / f"{slug}.csv"
         if not path.exists():
             return None
