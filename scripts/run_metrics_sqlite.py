@@ -8,8 +8,6 @@ import re
 from pathlib import Path
 from typing import Sequence, TYPE_CHECKING
 
-from typing import TYPE_CHECKING
-
 # if type checking, import sqlite3 from the standard library
 # otherwise, try to import pysqlite3 for better SQLite support
 if TYPE_CHECKING:
