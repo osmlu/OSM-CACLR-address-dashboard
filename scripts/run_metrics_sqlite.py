@@ -8,12 +8,17 @@ import re
 from pathlib import Path
 from typing import Sequence, TYPE_CHECKING
 
-import sqlite3 as _sqlite3
+from typing import TYPE_CHECKING
 
+# if type checking, import sqlite3 from the standard library
+# otherwise, try to import pysqlite3 for better SQLite support
 if TYPE_CHECKING:
-    sqlite3 = _sqlite3
-else:  # pragma: no cover - runtime override
-    import pysqlite3 as sqlite3  # type: ignore
+    import sqlite3
+else:
+    try:
+        import pysqlite3 as sqlite3
+    except ImportError:
+        import sqlite3
 
 import sys
 
