@@ -5,8 +5,15 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
-from typing import Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
+
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# pylint: disable-next=wrong-import-position
+from scripts.generate_dashboard import load_metrics  # noqa: E402
 
 # if type checking, import sqlite3 from the standard library
 # otherwise, try to import pysqlite3 for better SQLite support
@@ -18,17 +25,14 @@ else:
     except ImportError:
         import sqlite3
 
-import sys
-
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-from scripts.generate_dashboard import load_metrics
-
 
 def concat(*args: Sequence[object]) -> str:
+    """Concatenate values for SQLite's variadic ``concat`` function."""
     return "".join(str(a) for a in args)
 
 
 def regexp(pattern: str, value: object) -> int:
+    """Implement SQLite's ``regexp`` function using Python regular expressions."""
     if value is None:
         return 0
     return 1 if re.search(pattern, str(value)) else 0
@@ -49,8 +53,7 @@ def adapt_sql(sql: str) -> str:
     sql = sql.replace("i.date_fin_valid,", "")
     sql = sql.replace("opa.way && caclr.geom_3857 AND ", "")
     sql = re.sub(r"\blat_wgs84\b", "ST_Y(geom)", sql)
-    sql = re.sub(r"\blon_wgs84\b", "ST_X(geom)", sql)
-    return sql
+    return re.sub(r"\blon_wgs84\b", "ST_X(geom)", sql)
 
 
 def run(
@@ -59,6 +62,7 @@ def run(
     include_dir: str = "includes",
     only: str | None = None,
 ) -> None:
+    """Run all, or one, dashboard metrics against a SQLite fixture."""
     conn = sqlite3.connect(db_path)
     conn.enable_load_extension(True)
     conn.load_extension("mod_spatialite")
@@ -74,13 +78,14 @@ def run(
             cur = conn.execute(sql)
             rows = cur.fetchall()
             print(f"{metric.slug}: {len(rows)} rows")
-        except Exception as exc:  # pragma: no cover - manual script
+        except Exception as exc:  # pragma: no cover  # pylint: disable=broad-exception-caught
             print(f"{metric.slug}: ERROR {exc}")
 
     conn.close()
 
 
 def main() -> None:
+    """Parse command-line arguments and run fixture metrics."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "db", type=Path, nargs="?", default=Path("tests/fixture.sqlite"), help="Path to SQLite DB"

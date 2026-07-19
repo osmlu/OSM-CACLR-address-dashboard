@@ -43,7 +43,7 @@ lint:
           - flake8-builtins@2.5.0
           - flake8-comprehensions@3.16.0
           - flake8-annotations@3.1.1
-          - flake8-logging-format@2024.24.12
+          # Incompatible with current setuptools: imports the removed pkg_resources API.
           - flake8-typing-imports@1.16.0
           - flake8-assertive@2.1.0
           - flake8-aaa@0.17.0

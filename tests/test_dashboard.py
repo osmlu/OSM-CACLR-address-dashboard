@@ -1,7 +1,14 @@
+"""Tests for dashboard generation and history handling."""
+
+# pylint: disable=missing-class-docstring,missing-function-docstring,protected-access
+
+import logging
 import os
 from configparser import ConfigParser
+from datetime import date
+from decimal import Decimal
 from unittest.mock import patch
-import logging
+from urllib.parse import unquote
 
 import pytest
 
@@ -49,8 +56,6 @@ def test_josm_overpass_links(tmp_path):
     josm = dash._josm_link(rows, headers)
     assert josm.endswith("w1,n2")
     overpass = dash._overpass_link(rows, headers)
-    from urllib.parse import unquote
-
     assert "overpass-turbo" in overpass
     decoded = unquote(overpass)
     assert "way(1)" in decoded and "node(2)" in decoded
@@ -115,8 +120,6 @@ def test_run_handles_decimal_results(tmp_path):
     with open(os.path.join(metric_dir, "dec.sql"), "w", encoding="utf-8") as fh:
         fh.write("-- Title: D\n-- Description: d\nselect 1.5 as col;\n")
     dash = make_dashboard(cfg)
-    from decimal import Decimal
-
     with patch.object(dash, "_fetch_rows", return_value=([(Decimal("1.5"),)], ["col"])):
         dash.run()
     index = os.path.join(cfg["paths"]["output_dir"], "index.html")
@@ -129,8 +132,6 @@ def test_run_handles_date_results(tmp_path):
     with open(os.path.join(metric_dir, "date.sql"), "w", encoding="utf-8") as fh:
         fh.write("-- Title: D\n-- Description: d\nselect CURRENT_DATE as col;\n")
     dash = make_dashboard(cfg)
-    from datetime import date
-
     with patch.object(
         dash,
         "_fetch_rows",
@@ -159,5 +160,6 @@ def test_metrics_sorted_zero_last(tmp_path):
         dash.run()
 
     index = os.path.join(cfg["paths"]["output_dir"], "index.html")
-    html = open(index, encoding="utf-8").read()
+    with open(index, encoding="utf-8") as index_file:
+        html = index_file.read()
     assert html.index("<strong>B</strong>") < html.index("<strong>A</strong>")

@@ -1,3 +1,7 @@
+"""Tests for loading and expanding metric definitions."""
+
+# pylint: disable=missing-function-docstring
+
 import glob
 import os
 
@@ -28,7 +32,7 @@ def test_load_metrics_supports_subdirectories(tmp_path):
 
 def test_osm_potential_addresses_imports():
     for path in glob.glob(os.path.join("metrics", "**", "*.sql"), recursive=True):
-        with open(path) as fh:
+        with open(path, encoding="utf-8") as fh:
             content = fh.read()
         if "osm_potential_addresses" in content:
             lower = content.lower()
@@ -43,7 +47,7 @@ def test_osm_potential_addresses_imports():
 def test_load_metrics_includes_osm_addresses():
     metric_map = {metric.slug: metric.sql for metric in load_metrics("metrics", "includes")}
     for path in glob.glob(os.path.join("metrics", "**", "*.sql"), recursive=True):
-        with open(path) as fh:
+        with open(path, encoding="utf-8") as fh:
             content = fh.read()
         slug = os.path.splitext(os.path.basename(path))[0]
         lower_content = content.lower()

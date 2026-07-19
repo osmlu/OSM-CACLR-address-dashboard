@@ -134,6 +134,7 @@ def export_tables(sqlite_path: Path, dsn: str) -> None:
 
 
 def main() -> None:
+    """Parse command-line arguments and export the fixture database."""
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
         "output",

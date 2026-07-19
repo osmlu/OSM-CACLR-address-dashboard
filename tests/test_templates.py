@@ -1,3 +1,7 @@
+"""Tests for rendering dashboard templates."""
+
+# pylint: disable=missing-function-docstring
+
 from jinja2 import Environment, FileSystemLoader
 
 

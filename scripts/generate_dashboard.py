@@ -9,11 +9,10 @@ import glob
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from decimal import Decimal
 from configparser import ConfigParser
 from dataclasses import dataclass
+from decimal import Decimal
 from pathlib import Path
-from typing import TypedDict
 from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -40,33 +39,35 @@ class Metric:
     sql: str
 
 
-class MetricGraph(TypedDict):
-    """History data rendered for a metric."""
+if False:  # TYPE_CHECKING
+    from typing import TypedDict
 
-    dates: list[str]
-    values: list[int]
+    class MetricGraph(TypedDict):
+        """History data rendered for a metric."""
+
+        dates: list[str]
+        values: list[int]
+
+    class MetricDetails(TypedDict):
+        """Detailed query results rendered for a metric."""
+
+        rows: list[tuple]
+        headers: list[str]
+        josm: str | None
+        overpass: str | None
+
+    class DashboardMetric(TypedDict):
+        """Metric data passed to the dashboard template."""
+
+        slug: str
+        title: str
+        description: str
+        value: int
+        graph: MetricGraph | None
+        details: MetricDetails | None
 
 
-class MetricDetails(TypedDict):
-    """Detailed query results rendered for a metric."""
-
-    rows: list[tuple]
-    headers: list[str]
-    josm: str | None
-    overpass: str | None
-
-
-class DashboardMetric(TypedDict):
-    """Metric data passed to the dashboard template."""
-
-    slug: str
-    title: str
-    description: str
-    value: int
-    graph: MetricGraph | None
-    details: MetricDetails | None
-
-
+# pylint: disable-next=too-many-locals
 def load_metrics(metric_dir: str, include_dir: str) -> list[Metric]:
     """Load metrics from sql files."""
     metrics: list[Metric] = []
@@ -117,10 +118,11 @@ def load_metrics(metric_dir: str, include_dir: str) -> list[Metric]:
     return metrics
 
 
-class Dashboard:
+class Dashboard:  # pylint: disable=too-few-public-methods
     """Generate the dashboard from metrics."""
 
     def __init__(self: Dashboard, config: ConfigParser) -> None:
+        """Configure output paths, templates, and the database pool."""
         self.config = config
         self.output_dir = Path(self.config.get("paths", "output_dir", fallback="output"))
         self.history_dir = Path(self.config.get("paths", "history_dir", fallback="history"))
@@ -145,7 +147,7 @@ class Dashboard:
         max_conn = self.config.getint("database", "max_connections", fallback=32)
         self.pool = ThreadedConnectionPool(1, max_conn, **self.conn_params)
 
-    def run(self: Dashboard) -> None:
+    def run(self: Dashboard) -> None:  # pylint: disable=too-many-locals
         """Run the dashboard generation with all metrics."""
         metric_dir = self.config.get("paths", "metrics_dir", fallback="metrics")
         include_dir = self.config.get("paths", "includes_dir", fallback="includes")
@@ -184,12 +186,12 @@ class Dashboard:
                 details = None
             else:
                 value = len(rows)
-                details = MetricDetails(
-                    rows=rows,
-                    headers=headers,
-                    josm=self._josm_link(rows, headers),
-                    overpass=self._overpass_link(rows, headers),
-                )
+                details = {
+                    "rows": rows,
+                    "headers": headers,
+                    "josm": self._josm_link(rows, headers),
+                    "overpass": self._overpass_link(rows, headers),
+                }
             self._update_history(metric.slug, value)
             graph = self._plot_history(metric.slug)
             metrics.append(
@@ -223,7 +225,9 @@ class Dashboard:
             with conn.cursor() as cur:
                 cur.execute(sql)
                 rows = cur.fetchall()
-                headers = [d[0] for d in cur.description]
+                if cur.description is None:
+                    raise RuntimeError("metric query returned no columns")
+                headers = [column.name for column in cur.description]
         finally:
             self.pool.putconn(conn)
         return rows, headers
@@ -232,14 +236,14 @@ class Dashboard:
         """Convert non-JSON serialisable types to basic Python types."""
         converted: list[tuple] = []
         for row in rows:
-            new_row = []
-            for val in row:
-                if isinstance(val, Decimal):
-                    new_row.append(float(val))
-                elif isinstance(val, (dt.date, dt.datetime)):
-                    new_row.append(val.isoformat())
+            new_row: list[object] = []
+            for value in row:
+                if isinstance(value, Decimal):
+                    new_row.append(float(value))
+                elif isinstance(value, (dt.date, dt.datetime)):
+                    new_row.append(value.isoformat())
                 else:
-                    new_row.append(val)
+                    new_row.append(value)
             converted.append(tuple(new_row))
         return converted
 

@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 99
+extend-ignore = C812, E203, TYP001, W503
+per-file-ignores =
+    run_metrics_sqlite.py: T201
+    test_*.py: AAA, ANN, D1, PT018
