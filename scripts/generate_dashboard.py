@@ -8,11 +8,12 @@ import datetime as dt
 import glob
 import logging
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from configparser import ConfigParser
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
+from typing import TypedDict
 from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -39,32 +40,31 @@ class Metric:
     sql: str
 
 
-if False:  # TYPE_CHECKING
-    from typing import TypedDict
+class MetricGraph(TypedDict):
+    """History data rendered for a metric."""
 
-    class MetricGraph(TypedDict):
-        """History data rendered for a metric."""
+    dates: list[str]
+    values: list[int]
 
-        dates: list[str]
-        values: list[int]
 
-    class MetricDetails(TypedDict):
-        """Detailed query results rendered for a metric."""
+class MetricDetails(TypedDict):
+    """Detailed query results rendered for a metric."""
 
-        rows: list[tuple]
-        headers: list[str]
-        josm: str | None
-        overpass: str | None
+    rows: list[tuple]
+    headers: list[str]
+    josm: str | None
+    overpass: str | None
 
-    class DashboardMetric(TypedDict):
-        """Metric data passed to the dashboard template."""
 
-        slug: str
-        title: str
-        description: str
-        value: int
-        graph: MetricGraph | None
-        details: MetricDetails | None
+class DashboardMetric(TypedDict):
+    """Metric data passed to the dashboard template."""
+
+    slug: str
+    title: str
+    description: str
+    value: int
+    graph: MetricGraph | None
+    details: MetricDetails | None
 
 
 # pylint: disable-next=too-many-locals
@@ -186,12 +186,12 @@ class Dashboard:  # pylint: disable=too-few-public-methods
                 details = None
             else:
                 value = len(rows)
-                details = {
-                    "rows": rows,
-                    "headers": headers,
-                    "josm": self._josm_link(rows, headers),
-                    "overpass": self._overpass_link(rows, headers),
-                }
+                details = MetricDetails(
+                    rows=rows,
+                    headers=headers,
+                    josm=self._josm_link(rows, headers),
+                    overpass=self._overpass_link(rows, headers),
+                )
             self._update_history(metric.slug, value)
             graph = self._plot_history(metric.slug)
             metrics.append(
